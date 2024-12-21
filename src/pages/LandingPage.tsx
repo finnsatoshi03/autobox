@@ -1,14 +1,19 @@
-import { DesktopHero, MobileHero } from "@/components/hero";
+import {
+  DesktopHero,
+  MobileHero,
+  VideoHighlightMobile,
+} from "@/components/hero";
 
 export default function LandingPage() {
   return (
-    <div className="flex h-[calc(100vh-5rem)] w-full flex-col">
-      <section className="flex w-full flex-grow items-end">
+    <div className="flex h-[calc(100dvh-5rem)] w-full flex-col">
+      <section className="flex w-full items-end md:flex-grow">
         <div className="relative flex w-full flex-col">
           <div className="hidden md:block">
             <DesktopHero />
           </div>
-          <div className="md:hidden">
+          <div className="pt-56 md:hidden">
+            <VideoHighlightMobile />
             <MobileHero />
           </div>
         </div>
