@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}
+
+@font-face {
+  font-family: "Neue Haas Grotesk Display Pro";
+  font-weight: 400;
+  src: url("../assets/fonts/NeueHaasDisplayRoman.ttf") format("truetype");
+}
