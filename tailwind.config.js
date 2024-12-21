@@ -14,6 +14,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
+        white: "#EBEBEB",
         black: "#171717",
         "neon-pink": "#f712e8",
         "lime-green": "#39e717",
