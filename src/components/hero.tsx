@@ -27,55 +27,92 @@ export const VideoHighlight = () => (
 );
 
 export const GifHolder = () => (
-  <div className="absolute -top-8 right-4 md:-top-16 md:right-8 lg:right-16">
-    <div className="relative h-20 w-20 md:h-32 md:w-32 lg:h-40 lg:w-40">
-      <img
-        src="/images/b-mo.gif"
-        alt="BMO from Adventure Time"
-        className="h-full w-full rounded-2xl object-cover shadow-lg ring-2"
-      />
-    </div>
+  <div className="relative h-[min(12vw,7rem)] md:h-[clamp(3.5rem,7vw,9rem)]">
+    <img
+      src="/images/b-mo.gif"
+      alt="BMO from Adventure Time"
+      className="h-full w-full object-cover"
+    />
   </div>
 );
 
 export const HeroText = ({
   text,
   alignment = "left",
+  isLast = false,
 }: {
   text: string;
   alignment?: "right" | "left" | "center";
-}) => (
-  <h1
-    className={`whitespace-nowrap text-wrap text-[min(12vw,6rem)] uppercase leading-none text-black md:text-[clamp(1.5rem,6vw,8rem)] ${
-      alignment === "right" ? "text-right" : ""
-    }`}
-  >
-    {text}
-  </h1>
-);
+  isLast?: boolean;
+}) => {
+  const lastWord = isLast ? text.split(" ").pop() : null;
+  const textWithoutLastWord = isLast
+    ? text.split(" ").slice(0, -1).join(" ")
+    : text;
 
-export const DesktopHero = () => (
-  <div className="relative">
-    <div className="relative z-20 flex w-full flex-col md:flex-row md:items-center md:gap-8">
-      <HeroText text={HERO_TEXT.desktop[0]} />
-      <VideoHighlight />
-    </div>
-    {HERO_TEXT.desktop.slice(1).map((text, index) => (
-      <HeroText key={index} text={text} />
-    ))}
-    <GifHolder />
-  </div>
-);
+  return (
+    <h1
+      className={`w-fit whitespace-nowrap text-wrap text-[min(12vw,6rem)] uppercase leading-none text-black md:text-[clamp(1.5rem,6vw,8rem)] ${
+        alignment === "right" ? "text-right" : ""
+      } ${isLast ? "relative" : ""}`}
+    >
+      {isLast ? (
+        <>
+          <div className="md:hidden">
+            <div className="flex flex-col gap-2">
+              <span>{textWithoutLastWord}</span>
+              <span className="relative pr-[12%]">
+                {lastWord}
+                <div className="absolute -right-[1%] top-[0.5%]">
+                  <GifHolder />
+                </div>
+              </span>
+            </div>
+          </div>
+          <div className="hidden md:block">
+            {text}
+            <div className="absolute -right-[clamp(3.5rem,7vw,9rem)] top-[0.5%]">
+              <GifHolder />
+            </div>
+          </div>
+        </>
+      ) : (
+        text
+      )}
+    </h1>
+  );
+};
 
-export const MobileHero = () => (
-  <>
-    <HeroText text={HERO_TEXT.mobile[0]} />
-    {HERO_TEXT.mobile.slice(1).map((text, index) => (
-      <HeroText
-        key={index}
-        text={text}
-        alignment={index === HERO_TEXT.mobile.length - 2 ? "right" : "left"}
-      />
-    ))}
-  </>
-);
+export const DesktopHero = () => {
+  const lastIndex = HERO_TEXT.desktop.length - 1;
+  return (
+    <>
+      <div className="relative z-20 flex w-full flex-col md:flex-row md:items-center md:gap-8">
+        <HeroText text={HERO_TEXT.desktop[0]} />
+        <VideoHighlight />
+      </div>
+      <div className="relative">
+        {HERO_TEXT.desktop.slice(1).map((text, index) => (
+          <HeroText key={index} text={text} isLast={index === lastIndex - 1} />
+        ))}
+      </div>
+    </>
+  );
+};
+
+export const MobileHero = () => {
+  const lastIndex = HERO_TEXT.mobile.length - 1;
+  return (
+    <>
+      <HeroText text={HERO_TEXT.mobile[0]} />
+      {HERO_TEXT.mobile.slice(1).map((text, index) => (
+        <HeroText
+          key={index}
+          text={text}
+          alignment={index === HERO_TEXT.mobile.length - 2 ? "right" : "left"}
+          isLast={index === lastIndex - 1}
+        />
+      ))}
+    </>
+  );
+};

@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 export default function Navbar() {
   return (
-    <nav className="my-6">
+    <nav className="mx-4 my-6">
       <ul className="flex w-full items-center justify-between">
         <li>
           <NavLink to="home">AutoBox</NavLink>

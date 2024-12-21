@@ -3,9 +3,9 @@ import Navbar from "./Navbar";
 
 export default function AppLayout() {
   return (
-    <div className="relative h-screen w-screen bg-white">
-      <main className="mx-4 h-full overflow-auto text-black">
-        <Navbar />
+    <div className="relative h-screen w-screen overflow-y-auto overflow-x-hidden bg-white text-black">
+      <Navbar />
+      <main className="mx-4">
         <Outlet />
       </main>
     </div>
