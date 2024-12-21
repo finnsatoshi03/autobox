@@ -4,7 +4,8 @@ export default function Navbar() {
   return (
     <nav className="mx-4 my-6 text-zinc-400 mix-blend-difference">
       <ul className="flex w-full items-center justify-between">
-        <li>
+        <li className="flex items-center gap-1">
+          <img src="brand-icon.gif" className="size-12" />
           <NavLink to="home">AutoBox</NavLink>
         </li>
         <li>

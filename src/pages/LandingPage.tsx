@@ -6,7 +6,7 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="flex h-[calc(100dvh-5rem)] w-full flex-col">
+    <div className="flex h-[calc(100dvh-7rem)] w-full flex-col">
       <section className="flex w-full items-end md:flex-grow">
         <div className="relative flex w-full flex-col">
           <div className="hidden md:block">
