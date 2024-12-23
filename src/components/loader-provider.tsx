@@ -17,12 +17,12 @@ const LoadingProvider = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Ensure minimum 3 seconds loading time
+    // Ensure minimum 2 seconds loading time
     const minLoadingTime = setTimeout(() => {
       if (!externalLoading) {
         setIsLoading(false);
       }
-    }, 3000);
+    }, 2000);
 
     // Update loading state when external loading changes
     if (externalLoading) {

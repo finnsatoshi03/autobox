@@ -9,6 +9,7 @@ export default function App() {
   const assets: { type: "image" | "video"; src: string }[] = [
     { type: "image", src: "/b-mo.gif" },
     { type: "video", src: "/vides/hero-highlight.mp4" },
+    { type: "video", src: "/vides/playground-highlight.mp4" },
   ];
 
   const isLoading = useAssetLoader(assets);
