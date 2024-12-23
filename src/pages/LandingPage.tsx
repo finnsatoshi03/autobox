@@ -1,49 +1,89 @@
+import { useEffect, useRef } from "react";
 import {
   DesktopHero,
   MobileHero,
   VideoHighlightMobile,
 } from "@/components/hero";
-import { motion, useAnimation } from "framer-motion";
-import { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
-export default function LandingPage() {
-  const controls = useAnimation();
-  const [ref, inView] = useInView({
-    triggerOnce: false,
-    threshold: 0.5,
-  });
+gsap.registerPlugin(ScrollTrigger);
+
+const LandingPage = () => {
+  const videoContainerRef = useRef(null);
+  const heroSectionRef = useRef(null);
+  const videoSectionRef = useRef(null);
 
   useEffect(() => {
-    if (inView) {
-      // Animate to revealed state
-      controls.start({
-        height: "100vh",
-        width: "100%",
-        borderRadius: 0,
-        transition: {
-          duration: 1,
-          ease: "easeOut",
+    const videoContainer = videoContainerRef.current;
+    const heroSection = heroSectionRef.current;
+
+    const context = gsap.context(() => {
+      gsap.set(videoContainer, {
+        position: "absolute",
+        bottom: "-100vh",
+        left: "50%",
+        xPercent: -50,
+        width: "90vw",
+        height: "80vh",
+        borderRadius: "2rem",
+        zIndex: 50,
+        opacity: 0,
+        scale: 0.95,
+      });
+
+      const revealTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: heroSection,
+          start: "center center",
+          end: "bottom+=70% top",
+          scrub: 1,
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
         },
       });
-    } else {
-      // Animate to initial state
-      controls.start({
-        height: "20vh",
-        width: "50vw",
-        borderRadius: "5rem",
-        transition: {
-          duration: 1,
-          ease: "easeIn",
-        },
-      });
-    }
-  }, [controls, inView]);
+
+      revealTimeline
+        .to(videoContainer, {
+          opacity: 1,
+          scale: 1,
+          position: "fixed",
+          bottom: "-56vh",
+          duration: 0.4,
+          ease: "power2.out",
+        })
+        .to(
+          videoContainer,
+          {
+            bottom: 0,
+            width: "100vw",
+            height: "100vh",
+            borderRadius: 0,
+            duration: 0.6,
+            ease: "power4.inOut",
+          },
+          ">",
+        )
+        .to(
+          videoContainer,
+          {
+            yPercent: -100,
+            duration: 0.4,
+            ease: "power2.in",
+          },
+          ">+=0.2",
+        );
+    });
+
+    return () => context.revert();
+  }, []);
 
   return (
     <div className="relative">
-      {/* Hero Section */}
-      <div className="mb-4 flex h-[calc(100dvh-7rem)] w-full flex-col">
+      <div
+        ref={heroSectionRef}
+        className="mb-4 flex h-[calc(100dvh-7rem)] w-full flex-col"
+      >
         <section className="flex w-full items-end md:flex-grow">
           <div className="relative flex w-full flex-col">
             <div className="hidden md:block">
@@ -56,36 +96,29 @@ export default function LandingPage() {
           </div>
         </section>
       </div>
-
-      {/* Video Section */}
-      <div className="relative -mx-4 mt-12 flex h-[150vh] justify-center">
-        <motion.div
-          ref={ref}
-          animate={controls}
-          initial={{
-            height: "20vh",
-            width: "100%",
-          }}
-          className="sticky left-0 top-0 overflow-hidden"
+      <div ref={videoContainerRef} className="overflow-hidden">
+        <video
+          className="h-full w-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
         >
-          <video
-            className="h-full w-full object-cover"
-            autoPlay
-            loop
-            muted
-            playsInline
-          >
-            <source src="/videos/playground-highlight.mp4" type="video/mp4" />
-          </video>
-        </motion.div>
+          <source src="/videos/playground-highlight.mp4" type="video/mp4" />
+        </video>
       </div>
+      <div
+        ref={videoSectionRef}
+        className="video-section relative -mx-4 min-h-screen w-screen bg-white"
+      />
 
-      {/* Next Section */}
-      <div className="h-screen">
+      <div className="relative -mx-4 h-[200vh] w-screen bg-white">
         <div className="container mx-auto p-8">
           <h2 className="text-3xl font-bold">Next Section</h2>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default LandingPage;

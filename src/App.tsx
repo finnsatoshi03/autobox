@@ -1,8 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
-import LandingPage from "./pages/LandingPage";
-import LoadingProvider from "./components/loader-provider";
 
+import LandingPage from "./pages/LandingPage";
+import Playground from "./pages/Playground";
+
+import LoadingProvider from "./components/loader-provider";
 import { useAssetLoader } from "@/hooks/useAssetLoader";
 
 export default function App() {
@@ -21,6 +23,7 @@ export default function App() {
           <Route index element={<Navigate replace to="home" />} />
           <Route element={<AppLayout />}>
             <Route path="home" element={<LandingPage />} />
+            <Route path="playground" element={<Playground />} />
           </Route>
         </Routes>
       </LoadingProvider>
