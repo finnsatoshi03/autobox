@@ -38,13 +38,39 @@ const LandingPage = (): JSX.Element => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentFontStyle((prev) => (prev + 1) % fontStyles.length);
-    }, 1500);
+    }, 500);
 
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     const container = videoContainerRef.current;
+    let requestId: number;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+
+    const lerp = (start: number, end: number, factor: number) => {
+      return start + (end - start) * factor;
+    };
+
+    const animate = () => {
+      if (!textRef.current) return;
+
+      currentX = lerp(currentX, targetX, 0.3); // Increased from 0.1
+      currentY = lerp(currentY, targetY, 0.3); // Increased from 0.1
+
+      textRef.current.style.transform = `translate(${currentX}px, ${currentY}px)`;
+
+      // Only continue animation if movement is significant
+      if (
+        Math.abs(targetX - currentX) > 0.1 ||
+        Math.abs(targetY - currentY) > 0.1
+      ) {
+        requestId = requestAnimationFrame(animate);
+      }
+    };
 
     const handleMouseMove = (e: MouseEvent): void => {
       if (!container || !textRef.current) return;
@@ -56,24 +82,20 @@ const LandingPage = (): JSX.Element => {
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
 
-      const deltaX = mouseX - centerX;
-      const deltaY = mouseY - centerY;
+      targetX = mouseX - centerX;
+      targetY = mouseY - centerY;
 
-      textRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+      // Cancel existing animation frame before starting new one
+      cancelAnimationFrame(requestId);
+      requestId = requestAnimationFrame(animate);
     };
 
     const handleMouseLeave = (): void => {
-      if (!textRef.current) return;
-
-      textRef.current.style.transform = "translate(0, 0)";
-      textRef.current.style.transition = "transform 0.2s ease-out";
-
-      // Reset transition after it completes
-      setTimeout(() => {
-        if (textRef.current) {
-          textRef.current.style.transition = "";
-        }
-      }, 200);
+      targetX = 0;
+      targetY = 0;
+      if (!requestId) {
+        requestId = requestAnimationFrame(animate);
+      }
     };
 
     container?.addEventListener("mousemove", handleMouseMove);
@@ -82,6 +104,7 @@ const LandingPage = (): JSX.Element => {
     return () => {
       container?.removeEventListener("mousemove", handleMouseMove);
       container?.removeEventListener("mouseleave", handleMouseLeave);
+      cancelAnimationFrame(requestId);
     };
   }, []);
 
@@ -154,7 +177,7 @@ const LandingPage = (): JSX.Element => {
     <div className="relative">
       <div
         ref={heroSectionRef}
-        className="mb-4 flex h-[calc(100dvh-7rem)] w-full flex-col"
+        className="mb-4 flex h-[calc(100vh-7rem)] w-full flex-col"
       >
         <section className="flex w-full items-end md:flex-grow">
           <div className="relative flex w-full flex-col">
@@ -185,7 +208,7 @@ const LandingPage = (): JSX.Element => {
         <div className="absolute inset-0 bg-black/10 transition-colors hover:bg-black/20" />
         <div
           ref={textRef}
-          className={`absolute left-0 top-0 flex h-full w-full items-center justify-center text-9xl text-white mix-blend-difference ${
+          className={`absolute left-0 top-0 flex h-full w-full items-center justify-center text-5xl text-white mix-blend-difference sm:text-7xl md:text-9xl ${
             fontStyles[currentFontStyle]
           } -translate-x-1/2 -translate-y-1/2 transform transition-all duration-300`}
         >
@@ -196,9 +219,29 @@ const LandingPage = (): JSX.Element => {
         ref={videoSectionRef}
         className="video-section relative -mx-4 min-h-screen w-screen bg-white"
       />
-      <div className="relative -mx-4 h-[200vh] w-screen bg-white">
-        <div className="container mx-auto p-8">
-          <h2 className="text-3xl font-bold">Next Section</h2>
+
+      {/* About */}
+      <div className="relative -mx-4 -mt-10 h-screen w-screen bg-white">
+        <div className="p-8">
+          <h2 className="text-[min(12vw,6rem)] uppercase leading-none md:text-[clamp(1.5rem,6vw,8rem)]">
+            auto{" "}
+            <span className="relative font-bold text-lime-green">
+              b
+              <img
+                src="/images/star.gif"
+                className="absolute -left-2 top-8 size-4 md:-left-4 md:size-10"
+              />
+              <span className="inline-block rotate-[22deg] tracking-[-0.2em]">
+                o
+              </span>
+              x
+              <img
+                src="/images/star.gif"
+                className="absolute -right-4 bottom-8 size-4 md:-right-6 md:size-10"
+              />
+            </span>{" "}
+            annotation, <br /> simplified
+          </h2>
         </div>
       </div>
     </div>
