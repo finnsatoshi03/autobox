@@ -107,7 +107,7 @@ export const GifHolder = () => (
     animate={{ opacity: 1, scale: 1 }}
     transition={{
       duration: 0.8,
-      delay: 3.0, // Appears last in sequence
+      delay: 1.0, // Appears last in sequence
       ease: "easeOut",
     }}
     className="relative h-[min(12vw,7rem)] md:h-[clamp(3.5rem,7vw,9rem)]"

@@ -7,14 +7,17 @@ import { useLayoutContext } from "@/layout/AppLayout";
 gsap.registerPlugin(ScrollTrigger);
 
 const AnimatedVisionSection = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const visionRef = useRef<HTMLHeadingElement>(null);
   const { setIsDark, isDark } = useLayoutContext();
 
   useEffect(() => {
+    const container = containerRef.current;
     const section = sectionRef.current;
     const vision = visionRef.current;
-    if (!section || !vision) return;
+
+    if (!container || !section || !vision) return;
 
     // Split text into characters
     const splitText = new SplitType(vision, {
@@ -35,17 +38,26 @@ const AnimatedVisionSection = () => {
 
     // Create ScrollTrigger for background color
     ScrollTrigger.create({
-      trigger: section,
-      start: "top center",
-      end: "bottom center",
+      trigger: container,
+      start: "top top",
+      end: "bottom top",
       onEnter: () => setIsDark(true),
       onLeaveBack: () => setIsDark(false),
+    });
+
+    // Create ScrollTrigger for sticky behavior
+    ScrollTrigger.create({
+      trigger: container,
+      start: "top top",
+      end: "bottom top",
+      pin: section,
+      pinSpacing: false,
     });
 
     gsap
       .timeline({
         scrollTrigger: {
-          trigger: section,
+          trigger: container,
           start: "top center",
           end: "center center",
           scrub: 1,
@@ -69,16 +81,20 @@ const AnimatedVisionSection = () => {
   }, [setIsDark]);
 
   return (
-    <div
-      ref={sectionRef}
-      className={`-mx-4 flex min-h-screen w-screen justify-center overflow-hidden transition-colors duration-300 ease-in-out ${isDark ? "bg-black" : "bg-white"}`}
-    >
-      <h2
-        ref={visionRef}
-        className="relative py-32 text-5xl font-bold uppercase text-gray-500 sm:text-7xl md:text-8xl"
+    <div ref={containerRef} className="h-[300vh]">
+      <div
+        ref={sectionRef}
+        className={`-mx-4 flex h-screen w-screen justify-center overflow-hidden transition-colors duration-300 ease-in-out ${
+          isDark ? "bg-black" : "bg-white"
+        }`}
       >
-        Vision
-      </h2>
+        <h2
+          ref={visionRef}
+          className="relative py-32 text-5xl font-bold uppercase text-gray-500 sm:text-7xl md:text-8xl"
+        >
+          Vision
+        </h2>
+      </div>
     </div>
   );
 };
