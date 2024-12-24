@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { wordAnimation } from "./about-section";
 
 const HERO_TEXT = {
   desktop: [
@@ -30,19 +31,6 @@ const ANIMATION_SEQUENCE = [
 const getAnimationIndex = (word: string): number => {
   const lowercaseWord = word.toLowerCase();
   return ANIMATION_SEQUENCE.indexOf(lowercaseWord);
-};
-
-const wordAnimation = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (index: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: index * 0.3,
-      duration: 0.7,
-      ease: "easeOut",
-    },
-  }),
 };
 
 // Animation for complete lines (mobile)
