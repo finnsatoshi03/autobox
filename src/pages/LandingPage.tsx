@@ -8,6 +8,7 @@ import {
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import AnimatedAboutSection from "@/components/about-section";
+import AnimatedVisionSection from "@/components/vision-section";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -137,7 +138,6 @@ const LandingPage = (): JSX.Element => {
           scrub: 2, // Increased scrub value for smoother scrolling
           invalidateOnRefresh: true,
           anticipatePin: 1,
-          markers: true,
         },
       });
 
@@ -230,6 +230,7 @@ const LandingPage = (): JSX.Element => {
       <AnimatedAboutSection />
 
       {/* Vision */}
+      <AnimatedVisionSection />
     </div>
   );
 };
