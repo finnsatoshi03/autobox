@@ -10,15 +10,16 @@ const AnimatedVisionSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const visionRef = useRef<HTMLHeadingElement>(null);
+  const imagesContainerRef = useRef<HTMLDivElement>(null);
   const { setIsDark, isDark } = useLayoutContext();
 
   const getNumCopies = () => {
     const width = window.innerWidth;
-    if (width < 640) return 10; // mobile
-    if (width < 1024) return 15; // tablet
-    if (width < 3840) return 20; // desktop
-    if (width < 7680) return 40; // 4K
-    return 60; // 8K
+    if (width < 640) return 10;
+    if (width < 1024) return 15;
+    if (width < 3840) return 20;
+    if (width < 7680) return 40;
+    return 60;
   };
 
   useEffect(() => {
@@ -27,16 +28,16 @@ const AnimatedVisionSection = () => {
     const vision = visionRef.current;
     if (!container || !section || !vision) return;
 
-    // Split text into characters for the original
+    // Split text setup
     const splitText = new SplitType(vision, {
       types: "chars",
       tagName: "span",
     });
 
-    // Create copies of the VISION text
     const numCopies = getNumCopies();
     const copies: HTMLElement[] = [];
 
+    // Create copies with z-index
     for (let i = -numCopies; i <= numCopies; i++) {
       if (i === 0) continue;
 
@@ -47,6 +48,7 @@ const AnimatedVisionSection = () => {
       copy.style.left = "50%";
       copy.style.transform = "translate(-50%, -50%)";
       copy.style.top = "50%";
+      copy.style.zIndex = "1"; // Set z-index for text layers
       vision.parentElement?.appendChild(copy);
       copies.push(copy);
 
@@ -60,10 +62,9 @@ const AnimatedVisionSection = () => {
       return numChars * spacing;
     };
 
-    // Store initial positions after spread
     const charPositions = new Map();
 
-    // Set initial states for original text
+    // Initial states setup
     const originalChars = splitText.chars;
     if (originalChars) {
       gsap.set(originalChars, {
@@ -98,7 +99,7 @@ const AnimatedVisionSection = () => {
       });
     });
 
-    // ScrollTrigger setup with markers for debugging
+    // ScrollTrigger setup
     ScrollTrigger.create({
       trigger: container,
       start: "top top",
@@ -115,18 +116,17 @@ const AnimatedVisionSection = () => {
       pinSpacing: false,
     });
 
-    // First timeline - spread animation
+    // First timeline
     const spreadTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: container,
         start: "top center",
         end: "33% center",
         scrub: 1,
-        markers: true,
       },
     });
 
-    // Animate original text
+    // Spread animation
     spreadTimeline.to(splitText.chars, {
       opacity: 1,
       x: 0,
@@ -160,15 +160,12 @@ const AnimatedVisionSection = () => {
               const spacing = 1 + ySpacingMultiplier;
               const totalHeight = calculateTotalHeight(chars.length, spacing);
               const yPos = index * spacing - totalHeight / 2;
-
-              // Store the position for each character
               charPositions.set(target, {
                 x: position,
                 y: yPos,
                 copyIndex: idx,
                 charIndex: index,
               });
-
               return yPos;
             },
             duration: 1,
@@ -191,14 +188,13 @@ const AnimatedVisionSection = () => {
         );
     });
 
-    // Second timeline - gather into rows
+    // Second timeline
     const gatherTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: container,
         start: "33% center",
-        end: "66% center",
+        end: "43% center",
         scrub: 1,
-        markers: true,
       },
     });
 
@@ -207,6 +203,7 @@ const AnimatedVisionSection = () => {
     const viewportHeight = window.innerHeight;
     const rowSpacing = viewportHeight / (numChars + 10);
 
+    // Gather animation
     for (let charIndex = 0; charIndex < numChars; charIndex++) {
       const charRow = allCopies.map(
         (copy) => copy.querySelectorAll(".char")[charIndex],
@@ -215,11 +212,7 @@ const AnimatedVisionSection = () => {
       gatherTimeline.to(
         charRow,
         {
-          y: () => {
-            const rowOffset =
-              (charIndex + 5.5) * rowSpacing - viewportHeight / 2;
-            return rowOffset;
-          },
+          y: () => (charIndex + 5.5) * rowSpacing - viewportHeight / 2,
           x: (target) => {
             const pos = charPositions.get(target);
             return pos ? pos.x : 0;
@@ -231,17 +224,52 @@ const AnimatedVisionSection = () => {
       );
     }
 
-    // Third timeline - horizontal scroll
+    // Updated createImages function with z-index and opacity
+    const createImages = () => {
+      const imagesContainer = imagesContainerRef.current;
+      if (!imagesContainer) return [];
+
+      const imageConfigs = [
+        { width: 300, height: 200, top: "15%", delay: 0 },
+        { width: 400, height: 300, top: "45%", delay: 0.2 },
+        { width: 250, height: 350, top: "65%", delay: 0.4 },
+        { width: 350, height: 250, top: "25%", delay: 0.6 },
+        { width: 450, height: 300, top: "55%", delay: 0.8 },
+        { width: 280, height: 380, top: "35%", delay: 1 },
+      ];
+
+      return imageConfigs.map((config) => {
+        const img = document.createElement("img");
+        img.src = `https://placehold.co/${config.width}x${config.height}`;
+        img.alt = `Vision ${config.delay}`;
+        img.style.position = "absolute";
+        img.style.top = config.top;
+        img.style.right = `-${config.width}px`;
+        img.style.width = `${config.width}px`;
+        img.style.height = `${config.height}px`;
+        img.style.transform = "translateX(100px)";
+        img.style.borderRadius = "8px";
+        img.style.zIndex = "10"; // Set higher z-index for images
+        img.style.opacity = "0"; // Start with opacity 0
+        imagesContainer.appendChild(img);
+        return { element: img, delay: config.delay };
+      });
+    };
+
+    const images = createImages();
+
+    // Updated scroll timeline with continuous movement
     const scrollTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: container,
-        start: "66% center",
-        end: "bottom center",
+        start: "43% center",
+        end: "80% center",
         scrub: 1,
         markers: true,
       },
     });
 
+    // Character animations in scroll timeline
     for (let charIndex = 0; charIndex < numChars; charIndex++) {
       const charRow = allCopies.map(
         (copy) => copy.querySelectorAll(".char")[charIndex],
@@ -249,7 +277,7 @@ const AnimatedVisionSection = () => {
 
       const speed = 1 + charIndex * 0.15;
       const direction = charIndex % 2 === 0 ? 1 : -1;
-      const distance = window.innerWidth * 2.5; // Use viewport width for consistent movement
+      const distance = window.innerWidth * 2.5;
 
       scrollTimeline.to(
         charRow,
@@ -261,27 +289,109 @@ const AnimatedVisionSection = () => {
           },
           duration: 1,
           ease: "none",
-          overwrite: "auto", // Prevent animation conflicts
+          overwrite: "auto",
         },
         "scroll",
       );
     }
 
+    // Updated image animations with staggered entry
+    images.forEach(({ element: img, delay }) => {
+      const xDistance = window.innerWidth + parseInt(img.style.width);
+
+      scrollTimeline
+        .to(
+          img,
+          {
+            opacity: 1,
+            duration: 0.3,
+          },
+          `scroll+=${delay}`,
+        )
+        .to(
+          img,
+          {
+            x: -xDistance,
+            duration: 1,
+            ease: "none",
+          },
+          `scroll+=${delay}`,
+        );
+    });
+
+    // Return timeline
+    const returnTimeline = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: "80% center",
+        end: "bottom center",
+        scrub: 1,
+      },
+    });
+
+    // Return animations for characters
+    allCopies.forEach((copy, copyIndex) => {
+      const chars = copy.querySelectorAll(".char");
+
+      returnTimeline.to(
+        chars,
+        {
+          x:
+            copyIndex === 0
+              ? 0
+              : (target) => {
+                  const pos = charPositions.get(target);
+                  return pos ? pos.x : 0;
+                },
+          y: (index, _, arr) => {
+            const totalHeight = calculateTotalHeight(arr.length, 1);
+            return index - totalHeight / 2;
+          },
+          opacity: copyIndex === 0 ? 1 : 0,
+          duration: 1,
+          ease: "power2.inOut",
+          stagger: {
+            amount: 0.5,
+            from: "start",
+          },
+        },
+        "return",
+      );
+    });
+
+    // Fade out images during return
+    images.forEach(({ element: img }, index) => {
+      returnTimeline.to(
+        img,
+        {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut",
+        },
+        `return+=${index * 0.1}`,
+      );
+    });
+
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
       splitText.revert();
       copies.forEach((copy) => copy.remove());
+      images.forEach(({ element }) => element.remove());
     };
   }, [setIsDark]);
 
   return (
-    <div ref={containerRef} className="h-[400vh]">
+    <div ref={containerRef} className="h-[1000vh]">
       <div
         ref={sectionRef}
         className={`-mx-4 flex h-screen w-screen items-center justify-center overflow-hidden transition-colors duration-300 ease-in-out ${
           isDark ? "bg-black" : "bg-white"
         }`}
       >
+        <div
+          ref={imagesContainerRef}
+          className="pointer-events-none absolute inset-0"
+        ></div>
         <h2
           ref={visionRef}
           className="relative text-6xl font-bold uppercase text-gray-500 sm:text-8xl md:text-9xl"
