@@ -51,7 +51,7 @@ const AnimatedAboutSection = () => {
     gsap.timeline({
       scrollTrigger: {
         trigger: section,
-        start: "top center+=150",
+        start: "top center+=100",
         end: "bottom center",
         toggleActions: "play none none none",
         onEnter: () => {
