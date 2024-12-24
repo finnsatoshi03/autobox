@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import { useLayoutContext } from "@/layout/AppLayout";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,7 +12,7 @@ export const wordAnimation = {
     opacity: 1,
     y: 0,
     transition: {
-      delay: index * 0.3,
+      delay: index * 0.1,
       duration: 0.7,
       ease: "easeOut",
     },
@@ -24,7 +25,7 @@ const paragraphAnimation = {
     opacity: 1,
     y: 0,
     transition: {
-      delay: 1.5 + index * 0.2, // Start after header animation + stagger between paragraphs
+      delay: 0.5 + index * 0.2, // Start after header animation + stagger between paragraphs
       duration: 0.8,
       ease: [0.215, 0.61, 0.355, 1.0], // Custom easing for smooth entrance
     },
@@ -32,6 +33,7 @@ const paragraphAnimation = {
 };
 
 const AnimatedAboutSection = () => {
+  const { isDark } = useLayoutContext();
   const sectionRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const autoRef = useRef<HTMLSpanElement>(null);
@@ -48,7 +50,7 @@ const AnimatedAboutSection = () => {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
-        start: "top center+=100",
+        start: "top center+=150",
         end: "bottom center",
         toggleActions: "play none none reverse",
       },
@@ -72,7 +74,7 @@ const AnimatedAboutSection = () => {
   return (
     <div
       ref={sectionRef}
-      className="relative -mx-4 -mt-10 w-screen bg-white pb-16"
+      className={`relative -mx-4 -mt-10 w-screen pb-16 transition-colors duration-300 ease-in-out ${isDark ? "bg-black text-white" : "bg-white text-black"}`}
     >
       <div className="p-8">
         {/* Header Section */}

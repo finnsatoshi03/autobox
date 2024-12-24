@@ -9,6 +9,7 @@ import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import AnimatedAboutSection from "@/components/about-section";
 import AnimatedVisionSection from "@/components/vision-section";
+import { useLayoutContext } from "@/layout/AppLayout";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,6 +32,7 @@ const fontStyles: FontStyle[] = [
 
 const LandingPage = (): JSX.Element => {
   const navigate = useNavigate();
+  const { isDark } = useLayoutContext();
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLDivElement>(null);
   const videoSectionRef = useRef<HTMLDivElement>(null);
@@ -223,7 +225,7 @@ const LandingPage = (): JSX.Element => {
       </div>
       <div
         ref={videoSectionRef}
-        className="video-section relative -mx-4 min-h-screen w-screen bg-white"
+        className={`video-section relative -mx-4 min-h-screen w-screen ${isDark ? "bg-black" : "bg-white"}`}
       />
 
       {/* About */}
