@@ -114,6 +114,7 @@ const LandingPage = (): JSX.Element => {
     if (!videoContainer || !heroSection) return;
 
     const context = gsap.context(() => {
+      // Initial setup
       gsap.set(videoContainer, {
         position: "absolute",
         bottom: "-100vh",
@@ -131,8 +132,8 @@ const LandingPage = (): JSX.Element => {
         scrollTrigger: {
           trigger: heroSection,
           start: "center center",
-          end: "bottom+=70% top",
-          scrub: 1,
+          end: "bottom+=70% top", // Extended scroll range for smoother timing
+          scrub: 2, // Increased scrub value for smoother scrolling
           invalidateOnRefresh: true,
           anticipatePin: 1,
           markers: true,
@@ -140,23 +141,16 @@ const LandingPage = (): JSX.Element => {
       });
 
       revealTimeline
+        // Initial fade in and positioning
         .to(videoContainer, {
           opacity: 1,
           scale: 1,
           position: "fixed",
-          bottom: "-56vh",
-          duration: 0.4,
-          ease: "power2.out",
+          bottom: "-36vh",
+          duration: 1, // Longer duration for smoother entrance
+          ease: "power2.inOut", // Changed to inOut for smoother transition
         })
-        .to(videoContainer, {
-          opacity: 1,
-          scale: 1,
-          position: "fixed",
-          bottom: "-20vh",
-          duration: 0.4,
-          width: "95vw",
-          ease: "power2.out",
-        })
+        // Expand to full screen
         .to(
           videoContainer,
           {
@@ -164,20 +158,21 @@ const LandingPage = (): JSX.Element => {
             width: "100vw",
             height: "100vh",
             borderRadius: 0,
-            duration: 0.6,
-            ease: "power4.inOut",
+            duration: 1, // Longer duration for smoother expansion
+            ease: "power3.inOut", // More natural easing
           },
-          ">",
-        )
+          "-=0.2",
+        ) // Slight overlap for continuity
+        // Final slide out
         .to(
           videoContainer,
           {
             yPercent: -100,
-            duration: 0.4,
-            ease: "power2.in",
+            duration: 0.8, // Longer duration
+            ease: "power3.inOut", // Smoother exit
           },
-          ">+=0.2",
-        );
+          "+=0.1",
+        ); // Small pause before exit
     });
 
     return () => context.revert();

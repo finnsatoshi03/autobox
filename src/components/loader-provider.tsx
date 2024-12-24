@@ -58,7 +58,11 @@ const LoadingScreen = (): JSX.Element => {
         },
       }}
     >
-      <img src="/images/loader.gif" alt="Loading..." className="size-[50vh]" />
+      <img
+        src="/images/loader.gif"
+        alt="Loading..."
+        className="size-[60vw] md:size-[50vh]"
+      />
     </motion.div>
   );
 };
