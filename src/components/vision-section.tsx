@@ -38,7 +38,7 @@ const AnimatedVisionSection = () => {
     const copies: HTMLElement[] = [];
 
     for (let i = -numCopies; i <= numCopies; i++) {
-      if (i === 0) continue; // Skip center (original text)
+      if (i === 0) continue;
 
       const copy = document.createElement("h2");
       copy.className = vision.className;
@@ -59,6 +59,9 @@ const AnimatedVisionSection = () => {
     const calculateTotalHeight = (numChars: number, spacing: number) => {
       return numChars * spacing;
     };
+
+    // Store initial positions after spread
+    const charPositions = new Map();
 
     // Set initial states for original text
     const originalChars = splitText.chars;
@@ -95,7 +98,7 @@ const AnimatedVisionSection = () => {
       });
     });
 
-    // Create ScrollTrigger for background color
+    // ScrollTrigger setup with markers for debugging
     ScrollTrigger.create({
       trigger: container,
       start: "top top",
@@ -104,7 +107,6 @@ const AnimatedVisionSection = () => {
       onLeaveBack: () => setIsDark(false),
     });
 
-    // Create ScrollTrigger for sticky behavior
     ScrollTrigger.create({
       trigger: container,
       start: "top top",
@@ -113,54 +115,66 @@ const AnimatedVisionSection = () => {
       pinSpacing: false,
     });
 
-    const mainTimeline = gsap.timeline({
+    // First timeline - spread animation
+    const spreadTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: container,
         start: "top center",
-        end: "center center", // Adjusted for smoother scroll range
-        scrub: 2, // Increased scrub value for smoother scrolling
+        end: "33% center",
+        scrub: 1,
+        markers: true,
       },
     });
 
     // Animate original text
-    mainTimeline.to(splitText.chars, {
+    spreadTimeline.to(splitText.chars, {
       opacity: 1,
       x: 0,
-      duration: 2, // Increased duration
+      duration: 1,
       ease: "power2.out",
       stagger: {
-        amount: 1.5, // Increased stagger amount
+        amount: 1,
         from: "start",
       },
     });
 
-    // Animate copies
+    // Animate copies with position tracking
     copies.forEach((copy, idx) => {
       const chars = copy.querySelectorAll(".char");
       const isLeft = idx < numCopies;
       const position = isLeft
-        ? -((idx + 1.4) * 100)
-        : (idx - numCopies + 0.7) * 100;
+        ? -((idx + 1.4) * 140)
+        : (idx - numCopies + 0.7) * 140;
 
       const copyIndex = isLeft ? idx + 1 : idx - numCopies + 1;
       const normalizedDistance = Math.abs(copyIndex) / numCopies;
-      const ySpacingMultiplier = normalizedDistance * 60;
+      const ySpacingMultiplier = normalizedDistance * 100;
 
-      mainTimeline
+      spreadTimeline
         .to(
           chars,
           {
             opacity: 1,
             x: 0,
-            y: (index, _, arr) => {
+            y: (index, target) => {
               const spacing = 1 + ySpacingMultiplier;
-              const totalHeight = calculateTotalHeight(arr.length, spacing);
-              return index * spacing - totalHeight / 2;
+              const totalHeight = calculateTotalHeight(chars.length, spacing);
+              const yPos = index * spacing - totalHeight / 2;
+
+              // Store the position for each character
+              charPositions.set(target, {
+                x: position,
+                y: yPos,
+                copyIndex: idx,
+                charIndex: index,
+              });
+
+              return yPos;
             },
-            duration: 1.5, // Increased duration
-            ease: "power1.inOut", // Changed to smoother easing
+            duration: 1,
+            ease: "power1.inOut",
             stagger: {
-              amount: 0.8, // Increased stagger amount
+              amount: 0.5,
               from: "start",
             },
           },
@@ -170,12 +184,88 @@ const AnimatedVisionSection = () => {
           copy,
           {
             x: position,
-            duration: 2, // Increased duration
-            ease: "power2.inOut", // Changed to smoother easing
+            duration: 1,
+            ease: "power2.inOut",
           },
-          "spread+=0.2", // Reduced delay between char spacing and position
+          "spread",
         );
     });
+
+    // Second timeline - gather into rows
+    const gatherTimeline = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: "33% center",
+        end: "66% center",
+        scrub: 1,
+        markers: true,
+      },
+    });
+
+    const allCopies = [vision, ...copies];
+    const numChars = "Vision".length;
+    const viewportHeight = window.innerHeight;
+    const rowSpacing = viewportHeight / (numChars + 10);
+
+    for (let charIndex = 0; charIndex < numChars; charIndex++) {
+      const charRow = allCopies.map(
+        (copy) => copy.querySelectorAll(".char")[charIndex],
+      );
+
+      gatherTimeline.to(
+        charRow,
+        {
+          y: () => {
+            const rowOffset =
+              (charIndex + 5.5) * rowSpacing - viewportHeight / 2;
+            return rowOffset;
+          },
+          x: (target) => {
+            const pos = charPositions.get(target);
+            return pos ? pos.x : 0;
+          },
+          duration: 1,
+          ease: "power2.inOut",
+        },
+        "gather",
+      );
+    }
+
+    // Third timeline - horizontal scroll
+    const scrollTimeline = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: "66% center",
+        end: "bottom center",
+        scrub: 1,
+        markers: true,
+      },
+    });
+
+    for (let charIndex = 0; charIndex < numChars; charIndex++) {
+      const charRow = allCopies.map(
+        (copy) => copy.querySelectorAll(".char")[charIndex],
+      );
+
+      const speed = 1 + charIndex * 0.15;
+      const direction = charIndex % 2 === 0 ? 1 : -1;
+      const distance = window.innerWidth * 2.5; // Use viewport width for consistent movement
+
+      scrollTimeline.to(
+        charRow,
+        {
+          x: (i, target) => {
+            const pos = charPositions.get(target);
+            const baseX = pos ? pos.x : 0;
+            return baseX + (direction * distance) / speed;
+          },
+          duration: 1,
+          ease: "none",
+          overwrite: "auto", // Prevent animation conflicts
+        },
+        "scroll",
+      );
+    }
 
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
@@ -185,7 +275,7 @@ const AnimatedVisionSection = () => {
   }, [setIsDark]);
 
   return (
-    <div ref={containerRef} className="h-[300vh]">
+    <div ref={containerRef} className="h-[400vh]">
       <div
         ref={sectionRef}
         className={`-mx-4 flex h-screen w-screen items-center justify-center overflow-hidden transition-colors duration-300 ease-in-out ${
@@ -194,7 +284,7 @@ const AnimatedVisionSection = () => {
       >
         <h2
           ref={visionRef}
-          className="relative text-5xl font-bold uppercase text-gray-500 sm:text-7xl md:text-8xl"
+          className="relative text-6xl font-bold uppercase text-gray-500 sm:text-8xl md:text-9xl"
         >
           Vision
         </h2>
