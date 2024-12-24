@@ -263,7 +263,7 @@ const AnimatedVisionSection = () => {
       scrollTrigger: {
         trigger: container,
         start: "43% center",
-        end: "80% center",
+        end: "70% center",
         scrub: 1,
         markers: true,
       },
@@ -323,7 +323,7 @@ const AnimatedVisionSection = () => {
     const returnTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: container,
-        start: "80% center",
+        start: "70% center",
         end: "bottom center",
         scrub: 1,
       },
