@@ -233,6 +233,19 @@ const LandingPage = (): JSX.Element => {
 
       {/* Vision */}
       <AnimatedVisionSection />
+
+      {/* Reality */}
+      <div
+        className={`-mx-4 h-[300vh] w-screen transition-colors duration-300 ${isDark ? "bg-black text-white" : "bg-white text-black"}`}
+      >
+        <div className="flex h-full items-center justify-center">
+          <h2
+            className={`text-6xl font-bold uppercase sm:text-8xl md:text-9xl`}
+          >
+            Reality
+          </h2>
+        </div>
+      </div>
     </div>
   );
 };

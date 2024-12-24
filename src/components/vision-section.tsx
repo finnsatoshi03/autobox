@@ -13,20 +13,29 @@ const AnimatedVisionSection = () => {
   const imagesContainerRef = useRef<HTMLDivElement>(null);
   const { setIsDark, isDark } = useLayoutContext();
 
-  const getNumCopies = () => {
+  const getResponsiveValues = () => {
     const width = window.innerWidth;
-    if (width < 640) return 10;
-    if (width < 1024) return 15;
-    if (width < 3840) return 20;
-    if (width < 7680) return 40;
-    return 60;
+    if (width < 640) {
+      return { copies: 10, spacing: 60, xOffset: 80 };
+    }
+    if (width < 1024) {
+      return { copies: 15, spacing: 100, xOffset: 100 };
+    }
+    if (width < 3840) {
+      return { copies: 20, spacing: 140, xOffset: 140 };
+    }
+    if (width < 7680) {
+      return { copies: 40, spacing: 160, xOffset: 160 };
+    }
+    return { copies: 60, spacing: 180, xOffset: 180 };
   };
-
   useEffect(() => {
     const container = containerRef.current;
     const section = sectionRef.current;
     const vision = visionRef.current;
     if (!container || !section || !vision) return;
+
+    const { copies: numCopies, spacing, xOffset } = getResponsiveValues();
 
     // Split text setup
     const splitText = new SplitType(vision, {
@@ -34,7 +43,6 @@ const AnimatedVisionSection = () => {
       tagName: "span",
     });
 
-    const numCopies = getNumCopies();
     const copies: HTMLElement[] = [];
 
     // Create copies with z-index
@@ -143,12 +151,12 @@ const AnimatedVisionSection = () => {
       const chars = copy.querySelectorAll(".char");
       const isLeft = idx < numCopies;
       const position = isLeft
-        ? -((idx + 1.4) * 140)
-        : (idx - numCopies + 0.7) * 140;
+        ? -((idx + 1.4) * xOffset)
+        : (idx - numCopies + 0.7) * xOffset;
 
       const copyIndex = isLeft ? idx + 1 : idx - numCopies + 1;
       const normalizedDistance = Math.abs(copyIndex) / numCopies;
-      const ySpacingMultiplier = normalizedDistance * 100;
+      const ySpacingMultiplier = normalizedDistance * (spacing * 0.5);
 
       spreadTimeline
         .to(
@@ -201,7 +209,7 @@ const AnimatedVisionSection = () => {
     const allCopies = [vision, ...copies];
     const numChars = "Vision".length;
     const viewportHeight = window.innerHeight;
-    const rowSpacing = viewportHeight / (numChars + 10);
+    const rowSpacing = Math.min(viewportHeight / (numChars + 10), spacing);
 
     // Gather animation
     for (let charIndex = 0; charIndex < numChars; charIndex++) {
@@ -269,6 +277,16 @@ const AnimatedVisionSection = () => {
       },
     });
 
+    // Create a separate timeline for images
+    const imageScrollTimeline = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: "43% center",
+        end: "70% center",
+        scrub: 1,
+      },
+    });
+
     // Character animations in scroll timeline
     for (let charIndex = 0; charIndex < numChars; charIndex++) {
       const charRow = allCopies.map(
@@ -295,11 +313,11 @@ const AnimatedVisionSection = () => {
       );
     }
 
-    // Updated image animations with staggered entry
+    // Image animations in separate timeline
     images.forEach(({ element: img, delay }) => {
       const xDistance = window.innerWidth + parseInt(img.style.width);
 
-      scrollTimeline
+      imageScrollTimeline
         .to(
           img,
           {
@@ -319,7 +337,7 @@ const AnimatedVisionSection = () => {
         );
     });
 
-    // Return timeline
+    // Return timeline remains the same
     const returnTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: container,
@@ -381,7 +399,7 @@ const AnimatedVisionSection = () => {
   }, [setIsDark]);
 
   return (
-    <div ref={containerRef} className="h-[1000vh]">
+    <div ref={containerRef} className="h-[300vh]">
       <div
         ref={sectionRef}
         className={`-mx-4 flex h-screen w-screen items-center justify-center overflow-hidden transition-colors duration-300 ease-in-out ${
