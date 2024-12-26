@@ -56,7 +56,9 @@ const AnimatedVisionSection = () => {
       copy.style.left = "50%";
       copy.style.transform = "translate(-50%, -50%)";
       copy.style.top = "50%";
-      copy.style.zIndex = "1"; // Set z-index for text layers
+      copy.style.zIndex = "1";
+      copy.style.width = "100%"; // Ensure consistent width
+      copy.style.textAlign = "center"; // Center align text
       vision.parentElement?.appendChild(copy);
       copies.push(copy);
 
@@ -135,24 +137,26 @@ const AnimatedVisionSection = () => {
     });
 
     // Spread animation
-    spreadTimeline.to(splitText.chars, {
-      opacity: 1,
-      x: 0,
-      duration: 1,
-      ease: "power2.out",
-      stagger: {
-        amount: 1,
-        from: "start",
-      },
-    });
+    spreadTimeline
+      .to(splitText.chars, {
+        opacity: 1,
+        x: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        stagger: {
+          amount: 0.5,
+          from: "start",
+        },
+      })
+      .addLabel("spread", ">");
 
     // Animate copies with position tracking
     copies.forEach((copy, idx) => {
       const chars = copy.querySelectorAll(".char");
       const isLeft = idx < numCopies;
       const position = isLeft
-        ? -((idx + 1.4) * xOffset)
-        : (idx - numCopies + 0.7) * xOffset;
+        ? -((idx + 1) * xOffset)
+        : (idx - numCopies + 1) * xOffset;
 
       const copyIndex = isLeft ? idx + 1 : idx - numCopies + 1;
       const normalizedDistance = Math.abs(copyIndex) / numCopies;
@@ -273,7 +277,7 @@ const AnimatedVisionSection = () => {
         start: "43% center",
         end: "70% center",
         scrub: 1,
-        markers: true,
+        // markers: true,
       },
     });
 
@@ -295,7 +299,7 @@ const AnimatedVisionSection = () => {
 
       const speed = 1 + charIndex * 0.15;
       const direction = charIndex % 2 === 0 ? 1 : -1;
-      const distance = window.innerWidth * 2.5;
+      const distance = window.innerWidth * 2;
 
       scrollTimeline.to(
         charRow,
@@ -337,7 +341,6 @@ const AnimatedVisionSection = () => {
         );
     });
 
-    // Return timeline remains the same
     const returnTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: container,
@@ -369,7 +372,7 @@ const AnimatedVisionSection = () => {
           duration: 1,
           ease: "power2.inOut",
           stagger: {
-            amount: 0.5,
+            amount: 0.3,
             from: "start",
           },
         },
