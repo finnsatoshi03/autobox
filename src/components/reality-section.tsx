@@ -10,16 +10,16 @@ export default function AnimatedRealitySection() {
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   const leftWords = [
-    "Lorem",
-    "ipsum",
-    "dolor",
-    "sit",
-    "amet",
-    "consectetur",
-    "adipiscing",
-    "elit",
-    "sed",
-    "do",
+    "Automated Annotation",
+    "SIFT Algorithm",
+    "Scalability",
+    "Precision",
+    "Efficiency",
+    "User-Friendly",
+    "Versatile Integration",
+    "Time-Saving",
+    "Data Analytics",
+    "Innovation",
   ];
 
   const rightWords = [

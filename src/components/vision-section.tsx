@@ -130,7 +130,7 @@ const AnimatedVisionSection = () => {
     const spreadTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: container,
-        start: "top center",
+        start: "top-=100 center",
         end: "33% center",
         scrub: 1,
       },
