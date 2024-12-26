@@ -92,7 +92,7 @@ export default function AnimatedRealitySection() {
           gsap.to(text as Element, {
             scale: 1,
             opacity: 1,
-            duration: 1,
+            duration: 0.8,
             ease: "power2.out",
           });
         },
@@ -100,7 +100,7 @@ export default function AnimatedRealitySection() {
           gsap.to(text as Element, {
             scale: 0,
             opacity: 0,
-            duration: 0.8,
+            duration: 0,
             ease: "power2.in",
           });
         },
@@ -116,7 +116,7 @@ export default function AnimatedRealitySection() {
           gsap.to(text as Element, {
             scale: 1,
             opacity: 1,
-            duration: 1,
+            duration: 0.8,
             ease: "power2.out",
           });
         },
@@ -124,7 +124,7 @@ export default function AnimatedRealitySection() {
           gsap.to(text as Element, {
             scale: 0,
             opacity: 0,
-            duration: 0.8,
+            duration: 0,
             ease: "power2.in",
           });
         },

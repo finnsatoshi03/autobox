@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 import {
   DesktopHero,
   MobileHero,
@@ -6,8 +8,8 @@ import {
 import AnimatedAboutSection from "@/components/about-section";
 import AnimatedVisionSection from "@/components/vision-section";
 import AnimatedRealitySection from "@/components/reality-section";
-import { useRef } from "react";
 import { PlaygroundSection } from "@/components/playground-section";
+import AnimatedContactSection from "@/components/contact-section";
 
 const LandingPage = (): JSX.Element => {
   const heroSectionRef = useRef<HTMLDivElement>(null);
@@ -42,6 +44,9 @@ const LandingPage = (): JSX.Element => {
 
       {/* Reality */}
       <AnimatedRealitySection />
+
+      {/* Contact */}
+      <AnimatedContactSection />
     </div>
   );
 };
