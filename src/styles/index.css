@@ -12,3 +12,8 @@
   font-weight: 400;
   src: url("../assets/fonts/NeueHaasDisplayRoman.ttf") format("truetype");
 }
+@font-face {
+  font-family: "Neue Haas Grotesk Display Pro";
+  font-weight: 900;
+  src: url("../assets/fonts/NeueHaasDisplayBlack.ttf") format("truetype");
+}

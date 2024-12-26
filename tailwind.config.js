@@ -6,6 +6,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Neue Haas Grotesk Display Pro", "sans-serif"],
+        serif: ["Old Standard TT", "serif"],
         pixel: ["Pixelify Sans", "sans-serif"],
       },
       borderRadius: {
