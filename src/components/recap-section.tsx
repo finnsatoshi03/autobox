@@ -28,11 +28,6 @@ export default function AnimatedRecapSection() {
         onEnter: () => setIsDark(true),
         onEnterBack: () => setIsDark(true), // Keep dark when scrolling back up
         onLeave: () => setIsDark(false), // Only turn off when scrolling down past the end point
-        markers: process.env.NODE_ENV === "development",
-        onUpdate: (self) => {
-          const progress = self.progress;
-          console.log("Scroll progress:", progress);
-        },
       });
     });
 

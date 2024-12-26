@@ -5,9 +5,9 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 
 export default function AnimatedRealitySection() {
   const { isDark } = useLayoutContext();
-  const sectionRef = useRef(null);
-  const textContainerRef = useRef(null);
-  const titleRef = useRef(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   const leftWords = [
     "Lorem",
@@ -36,21 +36,25 @@ export default function AnimatedRealitySection() {
   ];
 
   useLayoutEffect(() => {
+    if (!sectionRef.current || !titleRef.current) return;
+
     gsap.registerPlugin(ScrollTrigger);
 
-    const leftElements = gsap.utils.toArray(".left-text");
-    const rightElements = gsap.utils.toArray(".right-text");
+    const leftElements = gsap.utils.toArray<Element>(".left-text");
+    const rightElements = gsap.utils.toArray<Element>(".right-text");
 
     // Set initial states
     gsap.set(leftElements, {
       scale: 0,
       opacity: 0,
+      x: -100,
       transformOrigin: "left center",
     });
 
     gsap.set(rightElements, {
       scale: 0,
       opacity: 0,
+      x: 100,
       transformOrigin: "right center",
     });
 
@@ -63,73 +67,100 @@ export default function AnimatedRealitySection() {
       opacity: 1,
     });
 
-    // Create timeline for Reality title
-    const tl = gsap.timeline({
+    // Create timeline for Reality title with enhanced scroll-back
+    const titleTl = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
         start: "top bottom",
         end: "bottom top",
-        scrub: true,
+        scrub: 1, // Smooth scrubbing effect
       },
     });
 
-    tl.to(titleRef.current, {
-      top: "180vh",
-      yPercent: -50,
-      duration: 10,
-      ease: "none",
-    });
+    titleTl
+      .to(titleRef.current, {
+        top: "180vh",
+        yPercent: -50,
+        duration: 10,
+        ease: "none",
+      })
+      .to(
+        titleRef.current,
+        {
+          duration: 5,
+        },
+        "<",
+      );
 
-    // Calculate total duration for left animations
+    // Calculate total duration for staggered animations
     const leftDuration = leftWords.length * 100;
 
-    // Animate left side first
+    // Enhanced left side animations with scroll-back effects
     leftElements.forEach((text, i) => {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: `top+=${i * 100 + 100} bottom`,
-        onEnter: () => {
-          gsap.to(text as Element, {
-            scale: 1,
-            opacity: 1,
-            duration: 0.8,
-            ease: "power2.out",
-          });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: `top+=${i * 100 + 100} bottom`,
+          end: `top+=${i * 100 + 300} bottom`,
+          scrub: 0.5,
+          toggleActions: "play reverse play reverse",
         },
-        onLeaveBack: () => {
-          gsap.to(text as Element, {
-            scale: 0,
-            opacity: 0,
-            duration: 0,
-            ease: "power2.in",
-          });
-        },
+      });
+
+      tl.to(text, {
+        scale: 1,
+        opacity: 1,
+        x: 0,
+        rotation: 0,
+        duration: 1,
+        ease: "power2.out",
       });
     });
 
-    // Animate right side after left side completes
+    // Enhanced right side animations with scroll-back effects
     rightElements.forEach((text, i) => {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: `top+=${leftDuration + i * 100 - 100} bottom`,
-        onEnter: () => {
-          gsap.to(text as Element, {
-            scale: 1,
-            opacity: 1,
-            duration: 0.8,
-            ease: "power2.out",
-          });
-        },
-        onLeaveBack: () => {
-          gsap.to(text as Element, {
-            scale: 0,
-            opacity: 0,
-            duration: 0,
-            ease: "power2.in",
-          });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: `top+=${leftDuration + i * 100 - 100} bottom`,
+          end: `top+=${leftDuration + i * 100 + 100} bottom`,
+          scrub: 0.5,
+          toggleActions: "play reverse play reverse",
         },
       });
+
+      tl.to(text, {
+        scale: 1,
+        opacity: 1,
+        x: 0,
+        rotation: 0,
+        duration: 1,
+        ease: "power2.out",
+      });
     });
+
+    // Add floating animation to visible elements
+    const addFloatingAnimation = (elements: Element[]) => {
+      elements.forEach((element) => {
+        const floatTl = gsap.timeline({
+          repeat: -1,
+          yoyo: true,
+          defaults: { duration: 1.5, ease: "power1.inOut" },
+        });
+
+        floatTl.to(element, {
+          y: gsap.utils.random(-10, 10),
+          x: gsap.utils.random(-5, 5),
+          rotation: gsap.utils.random(-5, 5),
+        });
+      });
+    };
+
+    // Apply floating animation to visible elements
+    const visibleElements = [...leftElements, ...rightElements].filter(
+      (element) => Number(gsap.getProperty(element, "opacity")) > 0,
+    );
+    addFloatingAnimation(visibleElements);
 
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
