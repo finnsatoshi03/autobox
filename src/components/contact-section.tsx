@@ -3,18 +3,29 @@ import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 
 export default function AnimatedContactSection() {
-  const sectionRef = useRef(null);
-  const leftHandRef = useRef(null);
-  const rightHandRef = useRef(null);
-  const pixelGridRef = useRef(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const leftHandRef = useRef<HTMLImageElement>(null);
+  const rightHandRef = useRef<HTMLImageElement>(null);
+  const pixelGridRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
+    if (
+      !sectionRef.current ||
+      !leftHandRef.current ||
+      !rightHandRef.current ||
+      !pixelGridRef.current
+    ) {
+      return;
+    }
+
     gsap.registerPlugin(ScrollTrigger);
     const mm = gsap.matchMedia();
 
     // Create pixel grid with center-out fill order
     const createPixelGrid = () => {
       const gridContainer = pixelGridRef.current;
+      if (!gridContainer) return [];
+
       gridContainer.innerHTML = ""; // Clear existing pixels
 
       const pixelSize = window.innerWidth <= 768 ? 20 : 40;
@@ -39,7 +50,7 @@ export default function AnimatedContactSection() {
       const remainingPositions = positions.slice(centerPixelCount);
 
       // Shuffle remaining positions for random fill
-      const shuffleArray = (array) => {
+      const shuffleArray = <T,>(array: T[]): T[] => {
         for (let i = array.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [array[i], array[j]] = [array[j], array[i]];
@@ -64,11 +75,11 @@ export default function AnimatedContactSection() {
         pixel.style.height = `${pixelSize}px`;
         pixel.style.left = `${pos.x * pixelSize}px`;
         pixel.style.top = `${pos.y * pixelSize}px`;
-        pixel.dataset.index = index; // Store index for animation order
+        pixel.dataset.index = index.toString(); // Store index for animation order
         gridContainer.appendChild(pixel);
       });
 
-      return gridContainer.children;
+      return Array.from(gridContainer.children) as HTMLDivElement[];
     };
 
     mm.add("(min-width: 768px)", () => {
@@ -115,17 +126,21 @@ export default function AnimatedContactSection() {
           end: "bottom top",
           scrub: true,
           onEnter: () => {
-            pixelGridRef.current.style.display = "block";
+            if (pixelGridRef.current) {
+              pixelGridRef.current.style.display = "block";
+            }
           },
           onLeaveBack: () => {
-            pixelGridRef.current.style.display = "none";
+            if (pixelGridRef.current) {
+              pixelGridRef.current.style.display = "none";
+            }
           },
           onUpdate: (self) => {
             const progress = self.progress;
             const pixelsToShow = Math.floor(pixels.length * progress);
 
-            Array.from(pixels).forEach((pixel) => {
-              const index = parseInt(pixel.dataset.index);
+            pixels.forEach((pixel) => {
+              const index = parseInt(pixel.dataset.index || "0");
               if (index <= pixelsToShow) {
                 pixel.style.transform = "scale(1)";
                 pixel.style.opacity = "1";

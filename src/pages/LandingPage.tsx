@@ -10,6 +10,7 @@ import AnimatedVisionSection from "@/components/vision-section";
 import AnimatedRealitySection from "@/components/reality-section";
 import { PlaygroundSection } from "@/components/playground-section";
 import AnimatedContactSection from "@/components/contact-section";
+import AnimatedRecapSection from "@/components/recap-section";
 
 const LandingPage = (): JSX.Element => {
   const heroSectionRef = useRef<HTMLDivElement>(null);
@@ -49,16 +50,7 @@ const LandingPage = (): JSX.Element => {
       <AnimatedContactSection />
 
       {/* Recap section */}
-      <div className="relative -mx-4 h-screen w-screen bg-black">
-        <div className="absolute z-50 flex h-full w-full items-center justify-center bg-transparent px-4">
-          <div className="flex items-center justify-center gap-4">
-            <h2 className="text-7xl font-bold text-black sm:text-8xl md:text-9xl">
-              PLAYGROUND
-            </h2>
-            <img src="/images/loader.gif" className="h-32" />
-          </div>
-        </div>
-      </div>
+      <AnimatedRecapSection />
     </div>
   );
 };
