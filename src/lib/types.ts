@@ -7,7 +7,9 @@ export type BaseImage = {
 };
 
 export type ClassValues = {
-  [key: string]: number;
+  class_values: {
+    [key: string]: number;
+  };
 };
 
 export type AutoBoxState = {

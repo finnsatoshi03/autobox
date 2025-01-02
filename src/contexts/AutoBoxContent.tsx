@@ -1,15 +1,10 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import JSZip from "jszip";
-import {
-  AutoBoxContextType,
-  AutoBoxState,
-  BaseImage,
-  ClassValues,
-} from "@/lib/types";
+import { AutoBoxContextType, AutoBoxState, BaseImage } from "@/lib/types";
 
 const initialState: AutoBoxState = {
   baseImages: [],
-  classValues: {},
+  classValues: { class_values: {} },
   targetImages: [],
   currentStep: "upload",
   labelFile: null,
@@ -60,7 +55,7 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
       });
 
       // Generate class values with proper indexing
-      const classValues: ClassValues = {};
+      const innerClassValues: { [key: string]: number } = {};
 
       updatedImages.forEach((img, index) => {
         if (!img.label) return;
@@ -71,13 +66,13 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
             ? `${img.label}-${occurrences.indexOf(index) + 1}.jpg`
             : `${img.label}.jpg`;
 
-        classValues[fileName] = index;
+        innerClassValues[fileName] = index;
       });
 
       return {
         ...prev,
         baseImages: updatedImages,
-        classValues,
+        classValues: { class_values: innerClassValues },
       };
     });
   }, []);
@@ -100,7 +95,7 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
   }, [state.baseImages]);
 
   const generateClassFile = () => {
-    const classValues: { [key: string]: number } = {};
+    const innerClassValues: { [key: string]: number } = {};
 
     // Create a map to track label occurrences
     const labelOccurrences: { [key: string]: number[] } = {};
@@ -123,17 +118,22 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
           ? `${img.label}-${occurrences.indexOf(index) + 1}.${extension}`
           : `${img.label}.${extension}`;
 
-      classValues[fileName] = index;
+      innerClassValues[fileName] = index;
     });
 
-    const content = JSON.stringify(classValues, null, 2);
+    const content = JSON.stringify({ class_values: innerClassValues }, null, 2);
     const file = new File([content], "class_values.txt", {
       type: "text/plain",
     });
-    setState((prev) => ({ ...prev, classValues, labelFile: file }));
+    setState((prev) => ({
+      ...prev,
+      classValues: { class_values: innerClassValues },
+      labelFile: file,
+    }));
     return file;
   };
 
+  // Rest of the code remains unchanged
   const createBaseImagesZip = async () => {
     const zip = new JSZip();
 

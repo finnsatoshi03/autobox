@@ -115,7 +115,7 @@ export default function Playground() {
         ...prev,
         baseImages: [],
         targetImages: [],
-        classValues: {},
+        classValues: { class_values: {} },
         currentStep: "upload",
         labelFile: null,
         processedZip: null,
@@ -139,7 +139,7 @@ export default function Playground() {
       <div className="flex h-[calc(100vh-9rem)] w-full flex-col items-center justify-between p-8">
         {/* Back Button */}
         <Button
-          variant="ghost"
+          variant="link"
           className="absolute left-4 top-24"
           onClick={handleBack}
         >
@@ -253,7 +253,7 @@ export default function Playground() {
     return (
       <div className="flex h-[calc(100vh-9rem)] w-full flex-col items-center justify-between p-8">
         <Button
-          variant="ghost"
+          variant="link"
           className="absolute left-4 top-24"
           onClick={handleBack}
         >
@@ -369,7 +369,7 @@ export default function Playground() {
         {isDragging && (
           <h2 className="text-3xl font-bold md:text-5xl">
             Drop the{" "}
-            {state.currentStep === "targetUpload" ? "ZIP files" : "images"}{" "}
+            {state.currentStep === "targetUpload" ? "ZIP file" : "images"}{" "}
             anywhere
           </h2>
         )}
@@ -377,8 +377,8 @@ export default function Playground() {
 
       {state.currentStep === "targetUpload" && (
         <Button
-          variant="ghost"
-          className="absolute left-4 top-24"
+          variant="link"
+          className="absolute left-4 top-20"
           onClick={handleBack}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -410,7 +410,7 @@ export default function Playground() {
             <Upload className="h-4 w-4" />
             <span>
               Choose{" "}
-              {state.currentStep === "targetUpload" ? "ZIP Files" : "Images"}
+              {state.currentStep === "targetUpload" ? "ZIP File" : "Images"}
             </span>
           </Button>
           <p className="text-sm text-gray-500">
