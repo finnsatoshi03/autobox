@@ -11,8 +11,8 @@ export default function Navbar() {
               to="home"
               className="font-black uppercase leading-none transition-colors hover:text-zinc-200"
             >
-              Zah
-              <br />
+              {/* Zah
+              <br /> */}
               Auto
               <br />
               Box

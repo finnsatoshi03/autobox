@@ -7,6 +7,7 @@ import Playground from "./pages/Playground";
 import LoadingProvider from "./components/loader-provider";
 import { useAssetLoader } from "@/hooks/useAssetLoader";
 import { SmoothScrollProvider } from "./contexts/SmoothScrollContext";
+import { AutoBoxProvider } from "./contexts/AutoBoxContent";
 
 export default function App() {
   const assets: { type: "image" | "video"; src: string }[] = [
@@ -19,15 +20,17 @@ export default function App() {
   return (
     <BrowserRouter>
       <SmoothScrollProvider>
-        <LoadingProvider isLoading={isLoading}>
-          <Routes>
-            <Route index element={<Navigate replace to="home" />} />
-            <Route element={<AppLayout />}>
-              <Route path="home" element={<LandingPage />} />
-              <Route path="playground" element={<Playground />} />
-            </Route>
-          </Routes>
-        </LoadingProvider>
+        <AutoBoxProvider>
+          <LoadingProvider isLoading={isLoading}>
+            <Routes>
+              <Route index element={<Navigate replace to="home" />} />
+              <Route element={<AppLayout />}>
+                <Route path="home" element={<LandingPage />} />
+                <Route path="playground" element={<Playground />} />
+              </Route>
+            </Routes>
+          </LoadingProvider>
+        </AutoBoxProvider>
       </SmoothScrollProvider>
     </BrowserRouter>
   );
