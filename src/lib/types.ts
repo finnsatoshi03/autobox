@@ -6,6 +6,11 @@ export type BaseImage = {
   originalName: string;
 };
 
+export type TargetImage = {
+  name: string;
+  size: number;
+};
+
 export type ClassValues = {
   class_values: {
     [key: string]: number;
