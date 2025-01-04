@@ -1,12 +1,13 @@
 import { TargetImage } from "@/lib/types";
 import { Button } from "../ui/button";
-import { ArrowLeft, FileArchive, X } from "lucide-react";
+import { ArrowLeft, FileArchive, Loader2, X } from "lucide-react";
 
 interface TargetImagesViewProps {
   images: TargetImage[];
   onImageRemove: (index: number) => void;
   onProceed: () => void;
   onBack: () => void;
+  isLoading: boolean;
 }
 
 export const TargetImagesView = ({
@@ -14,9 +15,15 @@ export const TargetImagesView = ({
   onImageRemove,
   onProceed,
   onBack,
+  isLoading,
 }: TargetImagesViewProps) => (
   <div className="flex h-[calc(100vh-9rem)] w-full flex-col items-center justify-between p-8">
-    <Button variant="link" className="absolute left-4 top-24" onClick={onBack}>
+    <Button
+      variant="link"
+      className="absolute left-4 top-24"
+      onClick={onBack}
+      disabled={isLoading}
+    >
       <ArrowLeft className="mr-2 h-4 w-4" />
       Back
     </Button>
@@ -56,8 +63,12 @@ export const TargetImagesView = ({
     </div>
 
     <div className="flex w-full justify-center">
-      <Button onClick={onProceed} className="mt-6">
-        Process Images
+      <Button onClick={onProceed} className="mt-6" disabled={isLoading}>
+        {isLoading ? (
+          <Loader2 className="size-2 animate-spin" />
+        ) : (
+          "Process Images"
+        )}
       </Button>
     </div>
   </div>

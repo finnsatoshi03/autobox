@@ -133,7 +133,6 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
     return file;
   };
 
-  // Rest of the code remains unchanged
   const createBaseImagesZip = async () => {
     const zip = new JSZip();
 
@@ -165,8 +164,16 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
       type: "application/zip",
     });
 
-    setState((prev) => ({ ...prev, processedZip: zipFile }));
-    return zipFile;
+    // Generate and store the class file right after creating the zip
+    const classFile = generateClassFile();
+
+    setState((prev) => ({
+      ...prev,
+      processedZip: zipFile,
+      labelFile: classFile,
+    }));
+
+    return { zipFile, classFile };
   };
 
   const downloadZip = async () => {
@@ -213,7 +220,6 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
 
   const handleProceed = async () => {
     await createBaseImagesZip();
-    // downloadZip();
     setState((prev) => ({ ...prev, currentStep: "targetUpload" }));
   };
 

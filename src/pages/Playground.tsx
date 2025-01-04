@@ -2,6 +2,7 @@ import { BaseImagesView } from "@/components/playground/base-images-view";
 import { TargetImagesView } from "@/components/playground/target-images-view";
 import { UploadView } from "@/components/playground/upload-view";
 import { useFileUpload } from "@/components/playground/useFileUpload";
+import { useSiftAnalysis } from "@/components/playground/useSiftAnalysis";
 import { useAutoBox } from "@/contexts/AutoBoxContent";
 import { useEffect, useState } from "react";
 
@@ -17,6 +18,7 @@ export default function Playground() {
     handleProceed,
     addTargetImages,
   } = useAutoBox();
+  const { mutate, isLoading } = useSiftAnalysis();
 
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const [showBaseImageDialog, setShowBaseImageDialog] = useState(true);
@@ -69,7 +71,33 @@ export default function Playground() {
     }
 
     try {
-      await handleProceed();
+      if (state.currentStep === "upload") {
+        await handleProceed();
+      } else if (state.currentStep === "targetUpload") {
+        const { classValues, targetImages, processedZip, labelFile } = state;
+        if (!processedZip) {
+          alert("Processed zip file is missing.");
+          return;
+        }
+        if (!labelFile) {
+          alert("Label file is missing.");
+          return;
+        }
+        const finalData = {
+          class: {
+            class_values: Object.fromEntries(
+              Object.entries(classValues.class_values).map(([key, value]) => [
+                key,
+                value.toString(),
+              ]),
+            ),
+          },
+          target_archive: targetImages[0],
+          base_archive: processedZip,
+          label: labelFile,
+        };
+        mutate(finalData);
+      }
     } catch (error) {
       console.error("Error processing images:", error);
       alert("Error processing images. Please try again.");
@@ -105,6 +133,7 @@ export default function Playground() {
         images={state.targetImages}
         onImageRemove={removeTargetImage}
         onProceed={handleProceedAndContinue}
+        isLoading={isLoading}
         onBack={handleBack}
       />
     );

@@ -39,3 +39,21 @@ export interface AutoBoxContextType {
   removeTargetImage: (index: number) => void;
   handleProceed: () => Promise<void>;
 }
+
+export interface SiftResponse {
+  accuracy: string;
+  download_url: string;
+  message: string;
+  total_fail: number;
+  total_images: number;
+  total_success: number;
+}
+
+export interface SiftRequest {
+  class: {
+    class_values: Record<string, string>;
+  };
+  target_archive: File;
+  base_archive: File;
+  label: File;
+}
