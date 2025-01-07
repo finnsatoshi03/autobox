@@ -16,7 +16,7 @@ const AutoBoxContext = createContext<AutoBoxContextType | undefined>(undefined);
 export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AutoBoxState>(initialState);
 
-  console.log(state);
+  // console.log(state);
 
   const addBaseImages = useCallback(async (files: File[]) => {
     const newImages: BaseImage[] = await Promise.all(
