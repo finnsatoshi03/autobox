@@ -3,6 +3,8 @@ import { NavLink, useLocation } from "react-router-dom";
 export default function Navbar() {
   const location = useLocation();
   const isHomePage = location.pathname === "/home" || location.pathname === "/";
+  const isPlaygroundPage = location.pathname === "/playground";
+  const isDocsPage = location.pathname === "/documentation";
 
   return (
     <nav
@@ -26,8 +28,31 @@ export default function Navbar() {
           <li>
             <p className="text-xs md:text-sm">Designed for Developers</p>
           </li>
-          <li className="mr-2 cursor-pointer uppercase italic transition-colors hover:text-zinc-200">
-            Docs
+          <li className="mr-2 flex items-center gap-4 uppercase italic">
+            {!isPlaygroundPage && (
+              <NavLink
+                to="playground"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-lime-green"
+                    : "cursor-pointer transition-colors hover:text-zinc-200"
+                }
+              >
+                App
+              </NavLink>
+            )}
+            {!isDocsPage && (
+              <NavLink
+                to="documentation"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-lime-green"
+                    : "cursor-pointer transition-colors hover:text-zinc-200"
+                }
+              >
+                Docs
+              </NavLink>
+            )}
           </li>
         </ul>
       </div>

@@ -1,6 +1,6 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import { Button } from "../ui/button";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, X, Tag } from "lucide-react";
 import { Input } from "../ui/input";
 import { AddMoreButton } from "./add-more";
 import { ImageThumbnail } from "./image-thumbnail";
@@ -15,6 +15,7 @@ interface BaseImagesViewProps {
   onAddMore: (files: File[]) => Promise<void>;
   onProceed: () => void;
   onBack: () => void;
+  onAssignIncrementalLabels?: (baseLabel: string) => void;
 }
 
 export const BaseImagesView = ({
@@ -26,7 +27,10 @@ export const BaseImagesView = ({
   onAddMore,
   onProceed,
   onBack,
+  onAssignIncrementalLabels,
 }: BaseImagesViewProps) => {
+  const [baseLabel, setBaseLabel] = useState<string>("");
+
   const selectedImage = selectedImageId
     ? images.find((img) => img.id === selectedImageId)
     : images[images.length - 1];
@@ -46,6 +50,14 @@ export const BaseImagesView = ({
     }
   };
 
+  const handleApplyIncrementalLabels = () => {
+    if (onAssignIncrementalLabels && baseLabel.trim()) {
+      onAssignIncrementalLabels(baseLabel);
+    }
+  };
+
+  const showAutoLabelingOption = images.length >= 5;
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       <Button
@@ -61,7 +73,7 @@ export const BaseImagesView = ({
           <h2 className="mb-4 text-2xl font-bold">Add Labels to Base Images</h2>
 
           <div className="w-full max-w-2xl flex-1 space-y-4">
-            <div className="relative aspect-video h-5/6 w-full overflow-hidden rounded-lg border border-gray-400">
+            <div className="relative aspect-video h-2/3 w-full overflow-hidden rounded-lg border border-gray-400">
               <img
                 src={selectedImage?.url}
                 alt={selectedImage?.originalName}
@@ -90,6 +102,26 @@ export const BaseImagesView = ({
               }
               className="w-full"
             />
+
+            {showAutoLabelingOption && (
+              <div className="flex w-full gap-2">
+                <Input
+                  placeholder="Base label (e.g. 'apple')"
+                  value={baseLabel}
+                  onChange={(e) => setBaseLabel(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={handleApplyIncrementalLabels}
+                  variant="outline"
+                  className="whitespace-nowrap border-lime-green hover:bg-lime-green/10"
+                  disabled={!baseLabel.trim()}
+                >
+                  <Tag className="h-4 w-4" />
+                  Auto-label ({baseLabel || "base"}-1,2,3...)
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -97,7 +129,7 @@ export const BaseImagesView = ({
           <div className="flex w-full gap-4 overflow-x-auto pb-4">
             <AddMoreButton
               onClick={() => document.getElementById("file-upload")?.click()}
-              disabled={images.length >= 5}
+              disabled={false}
             />
             {images.map((image) => (
               <ImageThumbnail

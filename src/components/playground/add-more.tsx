@@ -15,6 +15,6 @@ export const AddMoreButton = ({
     disabled={disabled}
   >
     <Plus className="h-6 w-6" />
-    <span className="text-xs">{disabled ? "Max 5 images" : "Add More"}</span>
+    <span className="text-xs">Add More</span>
   </Button>
 );

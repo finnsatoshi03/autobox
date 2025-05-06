@@ -75,10 +75,6 @@ export default function Playground() {
 
   const handleFileUpload = async (files: File[]) => {
     if (state.currentStep === "upload") {
-      if (state.baseImages.length + files.length > 5) {
-        alert("Maximum 5 base images allowed");
-        return;
-      }
       await addBaseImages(files);
       const lastImageId = state.baseImages[state.baseImages.length - 1]?.id;
       if (lastImageId) setSelectedImageId(lastImageId);
@@ -220,6 +216,24 @@ export default function Playground() {
     setShowBaseImageDialog(false);
   };
 
+  // Assign incremental labels to all images
+  const assignIncrementalLabels = (baseLabel: string) => {
+    if (!baseLabel.trim()) {
+      toast.error("Please enter a base label first");
+      return;
+    }
+
+    const label = baseLabel.trim().toLowerCase();
+
+    // Apply the incremental labels to all images
+    state.baseImages.forEach((image, index) => {
+      const incrementalLabel = `${label}-${index + 1}`;
+      addLabel(image.id, incrementalLabel);
+    });
+
+    toast.success(`Applied "${label}" labels to all images`);
+  };
+
   // Render functions
   const SuccessDialog = () => (
     <AlertDialog
@@ -303,6 +317,7 @@ export default function Playground() {
           onAddMore={handleFileUpload}
           onProceed={handleProceedAndContinue}
           onBack={handleBack}
+          onAssignIncrementalLabels={assignIncrementalLabels}
         />
       );
     }

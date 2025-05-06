@@ -7,10 +7,10 @@ import AppLayout from "./layout/AppLayout";
 
 import LandingPage from "./pages/LandingPage";
 import Playground from "./pages/Playground";
+import Documentation from "./pages/Documentation";
 
 import LoadingProvider from "./components/loader-provider";
 import { useAssetLoader } from "@/hooks/useAssetLoader";
-import { SmoothScrollProvider } from "./contexts/SmoothScrollContext";
 import { AutoBoxProvider } from "./contexts/AutoBoxContent";
 
 const queryClient = new QueryClient({
@@ -34,19 +34,18 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
-        <SmoothScrollProvider>
-          <AutoBoxProvider>
-            <LoadingProvider isLoading={isLoading}>
-              <Routes>
-                <Route index element={<Navigate replace to="home" />} />
-                <Route element={<AppLayout />}>
-                  <Route path="home" element={<LandingPage />} />
-                  <Route path="playground" element={<Playground />} />
-                </Route>
-              </Routes>
-            </LoadingProvider>
-          </AutoBoxProvider>
-        </SmoothScrollProvider>
+        <AutoBoxProvider>
+          <LoadingProvider isLoading={isLoading}>
+            <Routes>
+              <Route index element={<Navigate replace to="home" />} />
+              <Route element={<AppLayout />}>
+                <Route path="home" element={<LandingPage />} />
+                <Route path="playground" element={<Playground />} />
+                <Route path="documentation" element={<Documentation />} />
+              </Route>
+            </Routes>
+          </LoadingProvider>
+        </AutoBoxProvider>
       </BrowserRouter>
 
       <Toaster
