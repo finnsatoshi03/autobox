@@ -28,11 +28,38 @@ export const CodeBlock = ({ children }: { children: string }) => {
   );
 };
 
-export const SectionHeader = ({ children }: { children: React.ReactNode }) => {
+interface HeaderProps {
+  children: React.ReactNode;
+  id?: string;
+}
+
+export const SectionHeader = ({ children, id }: HeaderProps) => {
+  // Generate an ID from the text content if not provided
+  const headerId =
+    id ||
+    (typeof children === "string"
+      ? children.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      : undefined);
+
   return (
-    <h2 className="mb-3 mt-8 text-xl font-semibold text-gray-900">
+    <h2 id={headerId} className="mb-3 mt-8 text-xl font-semibold text-gray-900">
       {children}
     </h2>
+  );
+};
+
+export const SubsectionHeader = ({ children, id }: HeaderProps) => {
+  // Generate an ID from the text content if not provided
+  const headerId =
+    id ||
+    (typeof children === "string"
+      ? children.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      : undefined);
+
+  return (
+    <h3 id={headerId} className="mb-2 mt-6 text-lg font-medium text-gray-900">
+      {children}
+    </h3>
   );
 };
 

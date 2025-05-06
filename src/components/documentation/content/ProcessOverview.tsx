@@ -16,7 +16,7 @@ export const ProcessOverview = () => {
       <div className="my-8 flex flex-col gap-6">
         <div className="rounded-lg border border-gray-200 p-5">
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20 text-lime-green">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20">
               1
             </div>
             <h3 className="text-lg font-semibold">Base Image Upload</h3>
@@ -31,7 +31,7 @@ export const ProcessOverview = () => {
 
         <div className="rounded-lg border border-gray-200 p-5">
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20 text-lime-green">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20">
               2
             </div>
             <h3 className="text-lg font-semibold">Image Labeling</h3>
@@ -46,7 +46,7 @@ export const ProcessOverview = () => {
 
         <div className="rounded-lg border border-gray-200 p-5">
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20 text-lime-green">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20">
               3
             </div>
             <h3 className="text-lg font-semibold">Target Image Upload</h3>
@@ -60,7 +60,7 @@ export const ProcessOverview = () => {
 
         <div className="rounded-lg border border-gray-200 p-5">
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20 text-lime-green">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20">
               4
             </div>
             <h3 className="text-lg font-semibold">Analysis Processing</h3>
@@ -75,7 +75,7 @@ export const ProcessOverview = () => {
 
         <div className="rounded-lg border border-gray-200 p-5">
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20 text-lime-green">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-green/20">
               5
             </div>
             <h3 className="text-lg font-semibold">Results and Download</h3>
