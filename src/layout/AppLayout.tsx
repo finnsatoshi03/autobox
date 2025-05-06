@@ -10,14 +10,16 @@ type ContextType = {
 
 export default function AppLayout() {
   const location = useLocation();
+  const isHomePage = location.pathname === "/home" || location.pathname === "/";
+
   const { lenis } = useSmoothScroll();
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    if (lenis) {
+    if (lenis && isHomePage) {
       lenis.scrollTo(0, { immediate: true });
     }
-  }, [location.pathname, lenis]);
+  }, [location.pathname, lenis, isHomePage]);
 
   const contextValue: ContextType = {
     isDark,
@@ -31,7 +33,9 @@ export default function AppLayout() {
       }`}
     >
       <Navbar />
-      <main className="mx-4 pt-24">
+      <main
+        className={`${isHomePage ? "mx-4 pt-24" : "flex h-[calc(100%-7rem)] flex-col"}`}
+      >
         <Outlet context={contextValue} />
       </main>
     </div>

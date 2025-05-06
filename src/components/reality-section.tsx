@@ -23,16 +23,16 @@ export default function AnimatedRealitySection() {
   ];
 
   const rightWords = [
-    "eiusmod",
-    "tempor",
-    "incididunt",
-    "ut",
-    "labore",
-    "magna",
-    "aliqua",
-    "minim",
-    "veniam",
-    "quis",
+    "API Access",
+    "Free Platform",
+    "Intuitive Interface",
+    "High-Quality Outputs",
+    "Reduced Error Rates",
+    "Performance-Driven",
+    "Smart Annotation",
+    "Effortless Processing",
+    "Machine Learning Ready",
+    "Cost-Effective Solution",
   ];
 
   useLayoutEffect(() => {

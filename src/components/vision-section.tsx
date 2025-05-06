@@ -304,7 +304,7 @@ const AnimatedVisionSection = () => {
       scrollTimeline.to(
         charRow,
         {
-          x: (i, target) => {
+          x: (target) => {
             const pos = charPositions.get(target);
             const baseX = pos ? pos.x : 0;
             return baseX + (direction * distance) / speed;

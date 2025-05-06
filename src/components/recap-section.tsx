@@ -24,7 +24,7 @@ export default function AnimatedRecapSection() {
       ScrollTrigger.create({
         trigger: containerRef.current,
         start: "top center",
-        end: "center center",
+        end: "top center",
         onEnter: () => setIsDark(true),
         onEnterBack: () => setIsDark(true), // Keep dark when scrolling back up
         onLeave: () => setIsDark(false), // Only turn off when scrolling down past the end point
@@ -74,9 +74,9 @@ export default function AnimatedRecapSection() {
         >
           Let's get started on our
         </motion.p>
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
           <motion.h2
-            className="text-7xl font-bold sm:text-8xl md:text-9xl"
+            className="text-5xl font-bold sm:text-8xl md:text-9xl"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
