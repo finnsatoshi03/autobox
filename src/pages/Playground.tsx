@@ -7,6 +7,7 @@ import { UploadView } from "@/components/playground/upload-view";
 import { useFileUpload } from "@/components/playground/useFileUpload";
 import { useSiftAnalysis } from "@/components/playground/useSiftAnalysis";
 import { useAutoBox } from "@/contexts/AutoBoxContent";
+import { SiftResponse } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +18,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+// Define supported archive formats
+const SUPPORTED_ARCHIVE_FORMATS = [".zip", ".rar"];
 
 export default function Playground() {
   const {
@@ -29,6 +33,7 @@ export default function Playground() {
     validateLabels,
     handleProceed,
     addTargetImages,
+    createBaseImagesZip,
   } = useAutoBox();
   const { mutate, isLoading } = useSiftAnalysis();
 
@@ -36,6 +41,10 @@ export default function Playground() {
   const [showBaseImageDialog, setShowBaseImageDialog] = useState(true);
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<SiftResponse | null>(
+    null,
+  );
 
   const resetStateOptions = {
     full: {
@@ -57,6 +66,13 @@ export default function Playground() {
     setShowBaseImageDialog(shouldShow);
   }, []);
 
+  // Helper to check if file is a supported archive
+  const isArchiveFile = (fileName: string): boolean => {
+    return SUPPORTED_ARCHIVE_FORMATS.some((format) =>
+      fileName.toLowerCase().endsWith(format),
+    );
+  };
+
   const handleFileUpload = async (files: File[]) => {
     if (state.currentStep === "upload") {
       if (state.baseImages.length + files.length > 5) {
@@ -67,8 +83,10 @@ export default function Playground() {
       const lastImageId = state.baseImages[state.baseImages.length - 1]?.id;
       if (lastImageId) setSelectedImageId(lastImageId);
     } else if (state.currentStep === "targetUpload") {
-      if (files.some((file) => !file.name.endsWith(".zip"))) {
-        alert("Please upload ZIP files only for target images");
+      if (files.some((file) => !isArchiveFile(file.name))) {
+        alert(
+          `Please upload archive files only (${SUPPORTED_ARCHIVE_FORMATS.join(", ")}) for target images`,
+        );
         return;
       }
       await addTargetImages(files);
@@ -111,6 +129,11 @@ export default function Playground() {
       return;
     }
 
+    if (!targetImages.length) {
+      toast.error("No target images uploaded. Please upload a target archive.");
+      return;
+    }
+
     return {
       class: {
         class_values: Object.fromEntries(
@@ -139,18 +162,49 @@ export default function Playground() {
       }
 
       const loadingToast = toast.loading("Processing your images...");
+      setApiError(null);
 
       try {
-        const finalData = await processFinalData();
-        if (!finalData) return;
+        // Ensure we have the base archive and label file
+        if (!state.processedZip || !state.labelFile) {
+          // If missing, regenerate them
+          const { zipFile, classFile } = await createBaseImagesZip();
 
-        mutate(finalData);
-        toast.success("Processing completed successfully!");
-        setShowSuccessDialog(true);
+          // Make sure they're properly set in state
+          if (!zipFile || !classFile) {
+            toast.error("Failed to generate required files");
+            toast.dismiss(loadingToast);
+            return;
+          }
+        }
+
+        const finalData = await processFinalData();
+        if (!finalData) {
+          toast.dismiss(loadingToast);
+          return;
+        }
+
+        mutate(finalData, {
+          onSuccess: (data) => {
+            if (data && data.download_url) {
+              toast.success("Processing completed successfully!");
+              setAnalysisResults(data);
+              setShowSuccessDialog(true);
+            } else {
+              toast.error("Processing completed but no results were returned.");
+              setApiError("No download URL was returned from the server");
+            }
+            toast.dismiss(loadingToast);
+          },
+          onError: (error) => {
+            toast.error(`Error processing images: ${String(error)}`);
+            setApiError(String(error));
+            toast.dismiss(loadingToast);
+          },
+        });
       } catch (error) {
-        console.error("Error processing images:", error);
+        console.error("Error preparing data:", error);
         toast.error("Error processing images. Please try again.");
-      } finally {
         toast.dismiss(loadingToast);
       }
     } catch (error) {
@@ -168,21 +222,61 @@ export default function Playground() {
 
   // Render functions
   const SuccessDialog = () => (
-    <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+    <AlertDialog
+      open={showSuccessDialog && !apiError}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) setShowSuccessDialog(false);
+      }}
+    >
       <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle>
             Processing Completed Successfully!
           </AlertDialogTitle>
-          <AlertDialogDescription>
-            What would you like to do next?
+          <AlertDialogDescription className="text-center">
+            Here are your analysis results:
           </AlertDialogDescription>
         </AlertDialogHeader>
+
+        {analysisResults && (
+          <div className="mb-4 space-y-3">
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="font-semibold">Detection Accuracy:</div>
+              <div>{analysisResults.detection_accuracy}</div>
+
+              <div className="font-semibold">Processing Time:</div>
+              <div>{analysisResults.processing_time}</div>
+
+              <div className="font-semibold">Images Detected:</div>
+              <div>
+                {analysisResults.images_with_detections} of{" "}
+                {analysisResults.total_images}
+              </div>
+
+              <div className="font-semibold">Annotated Images:</div>
+              <div>{analysisResults.total_annotated_images}</div>
+            </div>
+
+            <div className="mt-4 flex">
+              <Button
+                onClick={() =>
+                  window.open(analysisResults.download_url, "_blank")
+                }
+              >
+                Download Results
+              </Button>
+            </div>
+          </div>
+        )}
+
         <AlertDialogFooter className="flex flex-col flex-wrap gap-2">
+          <div className="mb-2 w-full text-center text-sm">
+            What would you like to do next?
+          </div>
           <Button
             variant="outline"
             onClick={() => handleStateReset("keepBase")}
-            className="flex-1"
+            className="flex-1 border-gray-400"
           >
             Process New Dataset with Same Base Images
           </Button>

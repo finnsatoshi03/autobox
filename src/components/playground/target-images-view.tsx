@@ -10,6 +10,11 @@ interface TargetImagesViewProps {
   isLoading: boolean;
 }
 
+const getFileExtension = (filename: string): string => {
+  const ext = filename.split(".").pop()?.toUpperCase() || "";
+  return ext;
+};
+
 export const TargetImagesView = ({
   images,
   onImageRemove,
@@ -32,7 +37,7 @@ export const TargetImagesView = ({
       <h2 className="text-2xl font-bold">Uploaded Target Images</h2>
 
       <div className="w-full max-w-4xl">
-        {images.map((zip, index) => (
+        {images.map((archive, index) => (
           <div key={index} className="rounded-lg border border-gray-300 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -40,11 +45,11 @@ export const TargetImagesView = ({
                   <FileArchive />
                 </div>
                 <div>
-                  <p className="max-w-full truncate text-sm">{zip.name}</p>
+                  <p className="max-w-full truncate text-sm">{archive.name}</p>
                   <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <p>ZIP</p>
+                    <p>{getFileExtension(archive.name)}</p>
                     <p>&#x2022;</p>
-                    <p>{(zip.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p>{(archive.size / 1024 / 1024).toFixed(2)} MB</p>
                   </div>
                 </div>
               </div>

@@ -47,7 +47,7 @@ export const BaseImagesView = ({
   };
 
   return (
-    <div className="flex h-[calc(100vh-9rem)] w-full flex-col items-center justify-between p-8">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <Button
         variant="link"
         className="absolute left-4 top-24"
@@ -56,67 +56,68 @@ export const BaseImagesView = ({
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
       </Button>
+      <div className="flex h-full flex-col items-center justify-between">
+        <div className="flex h-full flex-col items-center px-8">
+          <h2 className="mb-4 text-2xl font-bold">Add Labels to Base Images</h2>
 
-      <div className="flex w-full flex-col items-center space-y-6">
-        <h2 className="text-2xl font-bold">Add Labels to Base Images</h2>
-
-        <div className="w-full max-w-2xl space-y-4">
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-400">
-            <img
-              src={selectedImage?.url}
-              alt={selectedImage?.originalName}
-              className="h-full w-full object-contain"
+          <div className="w-full max-w-2xl flex-1 space-y-4">
+            <div className="relative aspect-video h-5/6 w-full overflow-hidden rounded-lg border border-gray-400">
+              <img
+                src={selectedImage?.url}
+                alt={selectedImage?.originalName}
+                className="h-full w-full object-contain"
+              />
+              <Button
+                variant="destructive"
+                size="icon"
+                className="absolute right-2 top-2"
+                onClick={() => {
+                  if (selectedImage) {
+                    onImageRemove(selectedImage.id);
+                    const lastImageId = images[images.length - 2]?.id;
+                    onImageSelect(lastImageId || "");
+                  }
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <Input
+              placeholder="Enter label"
+              value={selectedImage?.label || ""}
+              onChange={(e) =>
+                handleLabelChange(selectedImage?.id || "", e.target.value)
+              }
+              className="w-full"
             />
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col px-8 pb-6 pt-4">
+          <div className="flex w-full gap-4 overflow-x-auto pb-4">
+            <AddMoreButton
+              onClick={() => document.getElementById("file-upload")?.click()}
+              disabled={images.length >= 5}
+            />
+            {images.map((image) => (
+              <ImageThumbnail
+                key={image.id}
+                image={image}
+                isSelected={selectedImageId === image.id}
+                onClick={() => onImageSelect(image.id)}
+              />
+            ))}
+          </div>
+
+          <div className="flex w-full justify-center">
             <Button
-              variant="destructive"
-              size="icon"
-              className="absolute right-2 top-2"
-              onClick={() => {
-                if (selectedImage) {
-                  onImageRemove(selectedImage.id);
-                  const lastImageId = images[images.length - 2]?.id;
-                  onImageSelect(lastImageId || "");
-                }
-              }}
+              onClick={onProceed}
+              className="mt-4"
+              disabled={!hasAllLabels || images.length === 0}
             >
-              <X className="h-4 w-4" />
+              Process and Continue
             </Button>
           </div>
-          <Input
-            placeholder="Enter label"
-            value={selectedImage?.label || ""}
-            onChange={(e) =>
-              handleLabelChange(selectedImage?.id || "", e.target.value)
-            }
-            className="w-full"
-          />
-        </div>
-      </div>
-
-      <div className="w-full pt-4">
-        <div className="flex w-full gap-4 overflow-x-auto pb-4">
-          <AddMoreButton
-            onClick={() => document.getElementById("file-upload")?.click()}
-            disabled={images.length >= 5}
-          />
-          {images.map((image) => (
-            <ImageThumbnail
-              key={image.id}
-              image={image}
-              isSelected={selectedImageId === image.id}
-              onClick={() => onImageSelect(image.id)}
-            />
-          ))}
-        </div>
-
-        <div className="flex w-full justify-center">
-          <Button
-            onClick={onProceed}
-            className="mt-6"
-            disabled={!hasAllLabels || images.length === 0}
-          >
-            Process and Continue
-          </Button>
         </div>
       </div>
 

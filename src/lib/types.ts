@@ -38,15 +38,17 @@ export interface AutoBoxContextType {
   addTargetImages: (files: File[]) => Promise<void>;
   removeTargetImage: (index: number) => void;
   handleProceed: () => Promise<void>;
+  createBaseImagesZip: () => Promise<{ zipFile: File; classFile: File }>;
 }
 
 export interface SiftResponse {
-  accuracy: string;
+  detection_accuracy: string;
   download_url: string;
+  images_with_detections: number;
   message: string;
-  total_fail: number;
+  processing_time: string;
+  total_annotated_images: string;
   total_images: number;
-  total_success: number;
 }
 
 export interface SiftRequest {

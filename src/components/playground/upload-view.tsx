@@ -90,7 +90,7 @@ export const UploadView = ({
         <p className="max-w-md text-sm text-gray-600">
           {currentStep === "upload"
             ? "Upload base images for reference. You'll add labels in the next step."
-            : "Upload target images in ZIP or RAR format for processing. Each archive should contain the images you want to analyze."}
+            : "Upload target images in a supported archive format for processing. Each archive should contain the images you want to analyze."}
         </p>
         <div className="flex flex-col items-center space-y-4">
           <Button

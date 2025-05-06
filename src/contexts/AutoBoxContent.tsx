@@ -121,15 +121,22 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
       innerClassValues[fileName] = index;
     });
 
+    // Create the content as a JSON string
     const content = JSON.stringify({ class_values: innerClassValues }, null, 2);
-    const file = new File([content], "class_values.txt", {
+
+    // Create a proper text file
+    const blob = new Blob([content], { type: "text/plain" });
+    const file = new File([blob], "class_values.txt", {
       type: "text/plain",
     });
+
+    // Update state with the class values and file
     setState((prev) => ({
       ...prev,
       classValues: { class_values: innerClassValues },
       labelFile: file,
     }));
+
     return file;
   };
 
@@ -167,6 +174,7 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
     // Generate and store the class file right after creating the zip
     const classFile = generateClassFile();
 
+    // Make sure both files are set in state before returning
     setState((prev) => ({
       ...prev,
       processedZip: zipFile,
@@ -224,10 +232,21 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addTargetImages = useCallback(async (files: File[]) => {
-    setState((prev) => ({
-      ...prev,
-      targetImages: [...prev.targetImages, ...files],
-    }));
+    // Make sure files is an array and contains valid files
+    if (!files || !files.length) {
+      console.error("No files provided to addTargetImages");
+      return;
+    }
+
+    // Ensure files are properly set in state
+    setState((prev) => {
+      // console.log("Adding target images:", files);
+
+      return {
+        ...prev,
+        targetImages: [...prev.targetImages, ...files],
+      };
+    });
   }, []);
 
   const removeTargetImage = useCallback((index: number) => {
@@ -248,6 +267,7 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
     addTargetImages,
     removeTargetImage,
     handleProceed,
+    createBaseImagesZip,
     setState,
   };
 
