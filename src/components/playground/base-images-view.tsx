@@ -1,10 +1,18 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { ArrowLeft, X, Tag } from "lucide-react";
+import { ArrowLeft, X, Tag, PlusCircle, Layers } from "lucide-react";
 import { Input } from "../ui/input";
 import { AddMoreButton } from "./add-more";
 import { ImageThumbnail } from "./image-thumbnail";
 import { BaseImage } from "@/lib/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../ui/dialog";
+import { Label } from "../ui/label";
 
 interface BaseImagesViewProps {
   images: BaseImage[];
@@ -30,6 +38,40 @@ export const BaseImagesView = ({
   onAssignIncrementalLabels,
 }: BaseImagesViewProps) => {
   const [baseLabel, setBaseLabel] = useState<string>("");
+  const [showAppendDialog, setShowAppendDialog] = useState(false);
+  const [appendBaseLabel, setAppendBaseLabel] = useState<string>("");
+  const [startIndex, setStartIndex] = useState<number>(1);
+  const [prevImagesLength, setPrevImagesLength] = useState<number>(0);
+  const [pendingLabelBatch, setPendingLabelBatch] = useState<{
+    prefix: string;
+    startIndex: number;
+    count: number;
+  } | null>(null);
+
+  // Track image array changes and apply pending labels
+  useEffect(() => {
+    // Only run when images length increases and we have pending labels
+    if (images.length > prevImagesLength && pendingLabelBatch) {
+      const { prefix, startIndex, count } = pendingLabelBatch;
+      const startPos = prevImagesLength;
+      const endPos = Math.min(startPos + count, images.length);
+
+      // Apply the labels to just the new images
+      for (let i = startPos; i < endPos; i++) {
+        const image = images[i];
+        const index = i - startPos;
+        const incrementalLabel = `${prefix.trim().toLowerCase()}-${startIndex + index}`;
+        console.log(`Applying label ${incrementalLabel} to image ${i}`);
+        onLabelChange(image.id, incrementalLabel);
+      }
+
+      // Clear the pending label batch
+      setPendingLabelBatch(null);
+    }
+
+    // Update previous length
+    setPrevImagesLength(images.length);
+  }, [images, pendingLabelBatch, prevImagesLength, onLabelChange]);
 
   const selectedImage = selectedImageId
     ? images.find((img) => img.id === selectedImageId)
@@ -53,6 +95,27 @@ export const BaseImagesView = ({
   const handleApplyIncrementalLabels = () => {
     if (onAssignIncrementalLabels && baseLabel.trim()) {
       onAssignIncrementalLabels(baseLabel);
+    }
+  };
+
+  const handleAppendFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.length) {
+      const filesToAdd = Array.from(e.target.files);
+      const fileCount = filesToAdd.length;
+
+      // Set up the pending label batch before adding files
+      if (appendBaseLabel.trim()) {
+        setPendingLabelBatch({
+          prefix: appendBaseLabel,
+          startIndex: startIndex,
+          count: fileCount,
+        });
+      }
+
+      // Add the files
+      await onAddMore(filesToAdd);
+      e.target.value = "";
+      setShowAppendDialog(false);
     }
   };
 
@@ -117,7 +180,7 @@ export const BaseImagesView = ({
                   className="whitespace-nowrap border-lime-green hover:bg-lime-green/10"
                   disabled={!baseLabel.trim()}
                 >
-                  <Tag className="h-4 w-4" />
+                  <Tag className="mr-2 h-4 w-4" />
                   Auto-label ({baseLabel || "base"}-1,2,3...)
                 </Button>
               </div>
@@ -126,6 +189,21 @@ export const BaseImagesView = ({
         </div>
 
         <div className="flex w-full flex-col px-8 pb-6 pt-4">
+          <div className="flex w-full items-center justify-between pb-2">
+            <div className="text-sm text-gray-500">
+              {images.length} image{images.length !== 1 ? "s" : ""} uploaded
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAppendDialog(true)}
+              className="border-lime-green hover:bg-lime-green/10"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Append Batch
+            </Button>
+          </div>
+
           <div className="flex w-full gap-4 overflow-x-auto pb-4">
             <AddMoreButton
               onClick={() => document.getElementById("file-upload")?.click()}
@@ -161,6 +239,81 @@ export const BaseImagesView = ({
         className="hidden"
         onChange={handleFileChange}
       />
+
+      <input
+        id="append-file-upload"
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={handleAppendFileChange}
+      />
+
+      <Dialog open={showAppendDialog} onOpenChange={setShowAppendDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Append New Batch of Images</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="append-base-label">Batch Label Prefix</Label>
+              <Input
+                id="append-base-label"
+                placeholder="Enter base label (e.g. 'banana')"
+                value={appendBaseLabel}
+                onChange={(e) => setAppendBaseLabel(e.target.value)}
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500">
+                Images will be auto-labeled as {appendBaseLabel || "batch"}-
+                {startIndex}, {appendBaseLabel || "batch"}-{startIndex + 1},
+                etc.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="start-index">Starting Index</Label>
+              <Input
+                id="start-index"
+                type="number"
+                min="1"
+                value={startIndex}
+                onChange={(e) => setStartIndex(parseInt(e.target.value) || 1)}
+                className="w-full"
+              />
+            </div>
+
+            <div className="flex justify-center rounded-md border border-dashed border-gray-300 px-6 py-10">
+              <div className="text-center">
+                <Layers className="mx-auto h-12 w-12 text-gray-400" />
+                <div className="mt-4 flex text-sm">
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      document.getElementById("append-file-upload")?.click()
+                    }
+                  >
+                    Select images to append
+                  </Button>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Images will be added to your current batch
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowAppendDialog(false)}
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
