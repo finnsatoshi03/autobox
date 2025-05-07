@@ -111,19 +111,44 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
   }, [state.baseImages]);
 
   const generateClassFile = () => {
-    const innerClassValues: { [key: string]: number } = {};
-
-    // Track label occurrences and prefixes
-    const labelOccurrences: { [key: string]: number[] } = {};
+    // Track label prefixes
     const prefixes = new Set<string>();
 
-    // First pass: collect all labels and prefixes
-    state.baseImages.forEach((img, index) => {
+    // First pass: collect all label prefixes
+    state.baseImages.forEach((img) => {
       if (!img.label) return;
 
       // Extract the label prefix
       const prefix = img.label.split("-")[0];
       prefixes.add(prefix);
+    });
+
+    // Convert prefixes to array for ordering
+    const prefixArray = Array.from(prefixes);
+
+    // Create a simple text with just the label prefixes (one per line)
+    // First line: prefix with class value 0, second line: prefix with class value 1
+    let content = "";
+
+    // Only add prefixes that exist
+    if (prefixArray.length > 0) {
+      content += prefixArray[0]; // First prefix (class value 0)
+
+      // If there's a second prefix, add it on a new line
+      if (prefixArray.length > 1) {
+        content += "\n" + prefixArray[1]; // Second prefix (class value 1)
+      }
+    }
+
+    // Still generate the class values internally for application use
+    const innerClassValues: { [key: string]: number } = {};
+
+    // Track label occurrences
+    const labelOccurrences: { [key: string]: number[] } = {};
+
+    // Collect label occurrences
+    state.baseImages.forEach((img, index) => {
+      if (!img.label) return;
 
       if (!labelOccurrences[img.label]) {
         labelOccurrences[img.label] = [index];
@@ -131,9 +156,6 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
         labelOccurrences[img.label].push(index);
       }
     });
-
-    // Convert prefixes to array for ease of access
-    const prefixArray = Array.from(prefixes);
 
     // Generate filenames with proper indexing and class values
     state.baseImages.forEach((img, index) => {
@@ -155,21 +177,31 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
       innerClassValues[fileName] = classValue;
     });
 
-    // Create the content as a JSON string
-    const content = JSON.stringify({ class_values: innerClassValues }, null, 2);
-
-    // Create a proper text file
+    // Create a proper text file with just the label prefixes
     const blob = new Blob([content], { type: "text/plain" });
     const file = new File([blob], "class_values.txt", {
       type: "text/plain",
     });
 
-    // Update state with the class values and file
+    // Update state with both the simplified file and the internal class values
     setState((prev) => ({
       ...prev,
       classValues: { class_values: innerClassValues },
       labelFile: file,
     }));
+
+    // Automatically download the file for debugging
+    // Commented out to prevent automatic downloads
+    /*
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "class_values.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    */
 
     return file;
   };

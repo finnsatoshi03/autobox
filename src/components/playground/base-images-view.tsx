@@ -205,11 +205,15 @@ export const BaseImagesView = ({
                 <Button
                   onClick={handleApplyIncrementalLabels}
                   variant="outline"
-                  className="whitespace-nowrap border-lime-green hover:bg-lime-green/10"
+                  className="w-48 truncate whitespace-nowrap border-lime-green hover:bg-lime-green/10"
                   disabled={!baseLabel.trim()}
                 >
                   <Tag className="mr-2 h-4 w-4" />
-                  Auto-label ({baseLabel || "base"}-1,2,3...)
+                  Auto-label (
+                  {baseLabel.length > 8
+                    ? `${baseLabel.substring(0, 8)}...`
+                    : baseLabel || "base"}
+                  -123)
                 </Button>
               </div>
             )}

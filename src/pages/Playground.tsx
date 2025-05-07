@@ -116,7 +116,7 @@ export default function Playground() {
   };
 
   const processFinalData = async () => {
-    const { classValues, targetImages, processedZip, labelFile } = state;
+    const { targetImages, processedZip, labelFile, classValues } = state;
 
     if (!processedZip || !labelFile) {
       toast.error(
@@ -130,6 +130,8 @@ export default function Playground() {
       return;
     }
 
+    // For backend compatibility, we still need to pass the class_values
+    // even though the label file now contains just the label names
     return {
       class: {
         class_values: Object.fromEntries(
