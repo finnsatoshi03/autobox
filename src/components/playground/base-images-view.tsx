@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "../ui/dialog";
 import { Label } from "../ui/label";
+import toast from "react-hot-toast";
 
 interface BaseImagesViewProps {
   images: BaseImage[];
@@ -48,6 +49,19 @@ export const BaseImagesView = ({
     count: number;
   } | null>(null);
 
+  // Helper to check if a label prefix already exists in the images
+  const getLabelPrefixes = () => {
+    const prefixes = new Set<string>();
+    images.forEach((image) => {
+      if (image.label) {
+        // Extract the prefix (e.g., "apple" from "apple-1")
+        const prefix = image.label.split("-")[0];
+        prefixes.add(prefix);
+      }
+    });
+    return Array.from(prefixes);
+  };
+
   // Track image array changes and apply pending labels
   useEffect(() => {
     // Only run when images length increases and we have pending labels
@@ -55,6 +69,18 @@ export const BaseImagesView = ({
       const { prefix, startIndex, count } = pendingLabelBatch;
       const startPos = prevImagesLength;
       const endPos = Math.min(startPos + count, images.length);
+
+      // Get existing label prefixes
+      const existingPrefixes = getLabelPrefixes();
+      const prefixExists = existingPrefixes.includes(
+        prefix.trim().toLowerCase(),
+      );
+
+      // Display which class value is being assigned
+      const classValue = prefixExists ? 0 : 1;
+      toast.success(
+        `Applying ${prefix} labels with class value: ${classValue}`,
+      );
 
       // Apply the labels to just the new images
       for (let i = startPos; i < endPos; i++) {
@@ -119,6 +145,9 @@ export const BaseImagesView = ({
   };
 
   const showAutoLabelingOption = images.length >= 5;
+
+  // Get the current unique label prefixes for the dialog
+  const currentPrefixes = getLabelPrefixes();
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
@@ -269,6 +298,15 @@ export const BaseImagesView = ({
                 {startIndex}, {appendBaseLabel || "batch"}-{startIndex + 1},
                 etc.
               </p>
+              {currentPrefixes.length > 0 && (
+                <div className="mt-2 text-xs">
+                  <span className="font-semibold">Current prefixes: </span>
+                  {currentPrefixes.join(", ")}
+                  <p className="mt-1 text-gray-600">
+                    Same prefix = class value 0, new prefix = class value 1
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

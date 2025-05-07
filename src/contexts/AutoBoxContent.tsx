@@ -16,7 +16,7 @@ const AutoBoxContext = createContext<AutoBoxContextType | undefined>(undefined);
 export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AutoBoxState>(initialState);
 
-  // console.log(state);
+  console.log(state);
 
   const addBaseImages = useCallback(async (files: File[]) => {
     const newImages: BaseImage[] = await Promise.all(
@@ -41,12 +41,18 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
         img.id === id ? { ...img, label } : img,
       );
 
-      // Create a map to track label occurrences
+      // Create a map to track label occurrences and prefix groups
       const labelOccurrences: { [key: string]: number[] } = {};
+      const prefixes = new Set<string>();
 
-      // First pass: collect all labels
+      // First pass: collect all labels and prefixes
       updatedImages.forEach((img, index) => {
         if (!img.label) return;
+
+        // Extract the label prefix (e.g. "apple" from "apple-1")
+        const prefix = img.label.split("-")[0];
+        prefixes.add(prefix);
+
         if (!labelOccurrences[img.label]) {
           labelOccurrences[img.label] = [index];
         } else {
@@ -54,19 +60,29 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      // Generate class values with proper indexing
+      // Convert prefixes to array for ease of access
+      const prefixArray = Array.from(prefixes);
+
+      // Generate class values with proper indexing and class values
       const innerClassValues: { [key: string]: number } = {};
 
       updatedImages.forEach((img, index) => {
         if (!img.label) return;
 
         const occurrences = labelOccurrences[img.label];
+        // Get the prefix to determine class value
+        const prefix = img.label.split("-")[0];
+        // Use first prefix as reference (class value 0)
+        // Any other prefix gets class value 1
+        const classValue = prefixArray.indexOf(prefix) === 0 ? 0 : 1;
+
+        const extension = img.originalName.split(".").pop() || "jpg";
         const fileName =
           occurrences.length > 1
-            ? `${img.label}-${occurrences.indexOf(index) + 1}.jpg`
-            : `${img.label}.jpg`;
+            ? `${img.label}-${occurrences.indexOf(index) + 1}.${extension}`
+            : `${img.label}.${extension}`;
 
-        innerClassValues[fileName] = index;
+        innerClassValues[fileName] = classValue;
       });
 
       return {
@@ -97,11 +113,18 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
   const generateClassFile = () => {
     const innerClassValues: { [key: string]: number } = {};
 
-    // Create a map to track label occurrences
+    // Track label occurrences and prefixes
     const labelOccurrences: { [key: string]: number[] } = {};
+    const prefixes = new Set<string>();
 
-    // First pass: collect all labels
+    // First pass: collect all labels and prefixes
     state.baseImages.forEach((img, index) => {
+      if (!img.label) return;
+
+      // Extract the label prefix
+      const prefix = img.label.split("-")[0];
+      prefixes.add(prefix);
+
       if (!labelOccurrences[img.label]) {
         labelOccurrences[img.label] = [index];
       } else {
@@ -109,16 +132,27 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Generate filenames with proper indexing
+    // Convert prefixes to array for ease of access
+    const prefixArray = Array.from(prefixes);
+
+    // Generate filenames with proper indexing and class values
     state.baseImages.forEach((img, index) => {
-      const extension = img.originalName.split(".").pop();
+      if (!img.label) return;
+
+      const extension = img.originalName.split(".").pop() || "jpg";
       const occurrences = labelOccurrences[img.label];
+
+      // Get the prefix to determine class value
+      const prefix = img.label.split("-")[0];
+      // First prefix gets class value 0, others get class value 1
+      const classValue = prefixArray.indexOf(prefix) === 0 ? 0 : 1;
+
       const fileName =
         occurrences.length > 1
           ? `${img.label}-${occurrences.indexOf(index) + 1}.${extension}`
           : `${img.label}.${extension}`;
 
-      innerClassValues[fileName] = index;
+      innerClassValues[fileName] = classValue;
     });
 
     // Create the content as a JSON string
@@ -143,11 +177,18 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
   const createBaseImagesZip = async () => {
     const zip = new JSZip();
 
-    // Create a map to track label occurrences
+    // Track label occurrences and prefixes
     const labelOccurrences: { [key: string]: number[] } = {};
+    const prefixes = new Set<string>();
 
-    // First pass: collect all labels
+    // First pass: collect all labels and prefixes
     state.baseImages.forEach((img, index) => {
+      if (!img.label) return;
+
+      // Extract the label prefix
+      const prefix = img.label.split("-")[0];
+      prefixes.add(prefix);
+
       if (!labelOccurrences[img.label]) {
         labelOccurrences[img.label] = [index];
       } else {
@@ -155,8 +196,11 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
+    // Generate class file with correct class values
+    generateClassFile();
+
     state.baseImages.forEach((img, index) => {
-      const extension = img.originalName.split(".").pop();
+      const extension = img.originalName.split(".").pop() || "jpg";
       const occurrences = labelOccurrences[img.label];
       const fileName =
         occurrences.length > 1
@@ -187,11 +231,13 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
   const downloadZip = async () => {
     const zip = new JSZip();
 
-    // Create a map to track label occurrences
+    // Track label occurrences and prefixes
     const labelOccurrences: { [key: string]: number[] } = {};
 
     // First pass: collect all labels
     state.baseImages.forEach((img, index) => {
+      if (!img.label) return;
+
       if (!labelOccurrences[img.label]) {
         labelOccurrences[img.label] = [index];
       } else {
@@ -201,7 +247,7 @@ export function AutoBoxProvider({ children }: { children: React.ReactNode }) {
 
     // Add base images with proper indexing
     state.baseImages.forEach((img, index) => {
-      const extension = img.originalName.split(".").pop();
+      const extension = img.originalName.split(".").pop() || "jpg";
       const occurrences = labelOccurrences[img.label];
       const fileName =
         occurrences.length > 1
