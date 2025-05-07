@@ -61,7 +61,6 @@ export const BaseImagesView = ({
         const image = images[i];
         const index = i - startPos;
         const incrementalLabel = `${prefix.trim().toLowerCase()}-${startIndex + index}`;
-        console.log(`Applying label ${incrementalLabel} to image ${i}`);
         onLabelChange(image.id, incrementalLabel);
       }
 
