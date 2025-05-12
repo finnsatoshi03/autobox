@@ -4,8 +4,13 @@ import {
   Paragraph,
   SectionHeader,
 } from "./ContentLayout";
+import { useContext } from "react";
+import { DocumentationContext } from "../DocumentationContext";
+import { api } from "@/services/api";
 
 export const ApiResponse = () => {
+  const { handleSectionChange } = useContext(DocumentationContext);
+
   return (
     <ContentLayout
       title="API Response Format"
@@ -20,13 +25,23 @@ export const ApiResponse = () => {
 
       <SectionHeader>Success Response Structure</SectionHeader>
       <Paragraph>
-        When a request is successful, the API returns a JSON object with the
-        following structure:
+        When a request is successful and processing is complete, the API returns
+        a JSON object with the following structure from the status URL. Note
+        that this is the final response after asynchronous processing is
+        complete - see the{" "}
+        <a
+          href="#"
+          className="text-blue-600 underline"
+          onClick={() => handleSectionChange("api-polling")}
+        >
+          Asynchronous Processing
+        </a>{" "}
+        section for details on the initial response and progress tracking.
       </Paragraph>
       <CodeBlock>
         {`{
   "detection_accuracy": "56.82%",
-  "download_url": "http://127.0.0.1:5000/download_archive/4a824bcf-aab6-48d8-bd0a-7a857c3e3a87",
+  "download_url": "${api}/download_archive/4a824bcf-aab6-48d8-bd0a-7a857c3e3a87",
   "images_with_detections": 23,
   "message": "success",
   "processing_time": "41.83 seconds",
@@ -199,36 +214,46 @@ export const ApiResponse = () => {
       <SectionHeader>Handling Responses in JavaScript</SectionHeader>
       <CodeBlock>
         {`// Example response handling code
-async function processSiftResults(apiResponse) {
-  const {
-    detection_accuracy,
-    download_url,
-    images_with_detections,
-    total_images,
-    total_annotated_images,
-    processing_time
-  } = apiResponse;
+import { api } from './services/api'; // Import from your config
 
-  console.log(\`Analysis complete in \${processing_time}\`);
-  console.log(\`Detected objects in \${images_with_detections} of \${total_images} images\`);
-  console.log(\`Detection accuracy: \${detection_accuracy}\`);
-  
-  // Download the results archive
-  if (download_url) {
-    // Option 1: Open in new tab
-    window.open(download_url, '_blank');
+async function processFinalResults(statusUrl) {
+  try {
+    // Fetch the final results from the status URL
+    const response = await fetch(statusUrl);
+    const apiResponse = await response.json();
     
-    // Option 2: Programmatic download
-    const response = await fetch(download_url);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'sift_results.zip';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    const {
+      detection_accuracy,
+      download_url,
+      images_with_detections,
+      total_images,
+      total_annotated_images,
+      processing_time
+    } = apiResponse;
+
+    console.log(\`Analysis complete in \${processing_time}\`);
+    console.log(\`Detected objects in \${images_with_detections} of \${total_images} images\`);
+    console.log(\`Detection accuracy: \${detection_accuracy}\`);
+    
+    // Download the results archive
+    if (download_url) {
+      // Option 1: Open in new tab
+      window.open(download_url, '_blank');
+      
+      // Option 2: Programmatic download
+      const response = await fetch(download_url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sift_results.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }
+  } catch (error) {
+    console.error("Error fetching final results:", error);
   }
 }`}
       </CodeBlock>

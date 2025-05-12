@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Sidebar } from "@/components/documentation/Sidebar";
 import { ContentTracker } from "@/components/documentation/ContentTracker";
+import { DocumentationContext } from "@/components/documentation/DocumentationContext";
 
 // Content components
 import { GettingStarted } from "@/components/documentation/content/GettingStarted";
@@ -13,6 +14,7 @@ import { ApiOverview } from "@/components/documentation/content/ApiOverview";
 import { ApiSift } from "@/components/documentation/content/ApiSift";
 import { ApiRequest } from "@/components/documentation/content/ApiRequest";
 import { ApiResponse } from "@/components/documentation/content/ApiResponse";
+import { ApiPolling } from "@/components/documentation/content/ApiPolling";
 import { AdvancedUsage } from "@/components/documentation/content/AdvancedUsage";
 
 // Define interfaces for recommendation objects
@@ -76,6 +78,11 @@ export default function Documentation() {
               onClick: () => handleSectionChange("api-request"),
             },
             {
+              title: "Asynchronous Processing",
+              href: "#",
+              onClick: () => handleSectionChange("api-polling"),
+            },
+            {
               title: "API Response Format",
               href: "#",
               onClick: () => handleSectionChange("api-response"),
@@ -84,6 +91,73 @@ export default function Documentation() {
               title: "Advanced Usage",
               href: "#",
               onClick: () => handleSectionChange("advanced"),
+            },
+          ];
+        case "api-request":
+          return [
+            {
+              title: "API Overview",
+              href: "#",
+              onClick: () => handleSectionChange("api-overview"),
+            },
+            {
+              title: "Asynchronous Processing",
+              href: "#",
+              onClick: () => handleSectionChange("api-polling"),
+            },
+            {
+              title: "API Response Format",
+              href: "#",
+              onClick: () => handleSectionChange("api-response"),
+            },
+          ];
+        case "api-response":
+          return [
+            {
+              title: "API Overview",
+              href: "#",
+              onClick: () => handleSectionChange("api-overview"),
+            },
+            {
+              title: "Asynchronous Processing",
+              href: "#",
+              onClick: () => handleSectionChange("api-polling"),
+            },
+            {
+              title: "API Request Format",
+              href: "#",
+              onClick: () => handleSectionChange("api-request"),
+            },
+          ];
+        case "api-polling":
+          return [
+            {
+              title: "API Overview",
+              href: "#",
+              onClick: () => handleSectionChange("api-overview"),
+            },
+            {
+              title: "API Request Format",
+              href: "#",
+              onClick: () => handleSectionChange("api-request"),
+            },
+            {
+              title: "API Response Format",
+              href: "#",
+              onClick: () => handleSectionChange("api-response"),
+            },
+          ];
+        case "advanced":
+          return [
+            {
+              title: "Getting Started",
+              href: "#",
+              onClick: () => handleSectionChange("getting-started"),
+            },
+            {
+              title: "API Documentation",
+              href: "#",
+              onClick: () => handleSectionChange("api-overview"),
             },
           ];
         default:
@@ -127,6 +201,8 @@ export default function Documentation() {
         return <ApiRequest />;
       case "api-response":
         return <ApiResponse />;
+      case "api-polling":
+        return <ApiPolling />;
       case "advanced":
         return <AdvancedUsage />;
       default:
@@ -140,7 +216,9 @@ export default function Documentation() {
         activeSection={activeSection}
         onSectionChange={setActiveSection}
       />
-      <div className="flex-1 overflow-y-auto p-8">{renderContent()}</div>
+      <DocumentationContext.Provider value={{ handleSectionChange }}>
+        <div className="flex-1 overflow-y-auto p-8">{renderContent()}</div>
+      </DocumentationContext.Provider>
       <ContentTracker
         activeSection={activeSection}
         recommendations={recommendations}

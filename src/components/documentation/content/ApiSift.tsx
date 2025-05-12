@@ -4,8 +4,13 @@ import {
   Paragraph,
   SectionHeader,
 } from "./ContentLayout";
+import { useContext } from "react";
+import { DocumentationContext } from "../DocumentationContext";
+import { api } from "@/services/api";
 
 export const ApiSift = () => {
+  const { handleSectionChange } = useContext(DocumentationContext);
+
   return (
     <ContentLayout
       title="SIFT Analysis API"
@@ -19,7 +24,7 @@ export const ApiSift = () => {
       </Paragraph>
 
       <SectionHeader>Endpoint</SectionHeader>
-      <CodeBlock>{`POST http://127.0.0.1:5000/run-sift`}</CodeBlock>
+      <CodeBlock>{`POST ${api}/run-sift`}</CodeBlock>
 
       <SectionHeader>Content Type</SectionHeader>
       <Paragraph>
@@ -110,20 +115,87 @@ export const ApiSift = () => {
 
       <SectionHeader>Response</SectionHeader>
       <Paragraph>
-        Upon successful processing, the endpoint returns a JSON object with the
-        following structure:
+        When a request is initiated, the endpoint returns a JSON object with
+        tracking information to allow for asynchronous processing. The response
+        contains the following structure:
       </Paragraph>
       <CodeBlock>
         {`{
-  "detection_accuracy": "56.82%",
-  "download_url": "http://127.0.0.1:5000/download_archive/4a824bcf-aab6-48d8-bd0a-7a857c3e3a87",
-  "images_with_detections": 23,
-  "message": "success",
-  "processing_time": "41.83 seconds",
-  "total_annotated_images": "4.26%",
-  "total_images": 540
+  "message": "processing started",
+  "progress_url": "${api}/progress/05e343ef-c698-4e9c-b4f4-5e91c30a313c",
+  "status_url": "${api}/get-results/05e343ef-c698-4e9c-b4f4-5e91c30a313c",
+  "uid": "05e343ef-c698-4e9c-b4f4-5e91c30a313c"
 }`}
       </CodeBlock>
+
+      <div className="mb-6 overflow-hidden rounded-lg border border-gray-200">
+        <table className="w-full border-collapse text-left">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-sm font-semibold text-gray-900">
+                Field
+              </th>
+              <th className="px-4 py-3 text-sm font-semibold text-gray-900">
+                Type
+              </th>
+              <th className="px-4 py-3 text-sm font-semibold text-gray-900">
+                Description
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            <tr>
+              <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">
+                message
+              </td>
+              <td className="px-4 py-3 text-sm">string</td>
+              <td className="px-4 py-3 text-sm">
+                Status message indicating that processing has started
+              </td>
+            </tr>
+            <tr>
+              <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">
+                progress_url
+              </td>
+              <td className="px-4 py-3 text-sm">string</td>
+              <td className="px-4 py-3 text-sm">
+                URL to poll for real-time progress updates
+              </td>
+            </tr>
+            <tr>
+              <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">
+                status_url
+              </td>
+              <td className="px-4 py-3 text-sm">string</td>
+              <td className="px-4 py-3 text-sm">
+                URL to retrieve final results once processing is complete
+              </td>
+            </tr>
+            <tr>
+              <td className="whitespace-nowrap px-4 py-3 text-sm font-medium">
+                uid
+              </td>
+              <td className="px-4 py-3 text-sm">string</td>
+              <td className="px-4 py-3 text-sm">
+                Unique identifier for this processing job
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <Paragraph>
+        For details about tracking the progress of analysis and retrieving the
+        final results, see the{" "}
+        <a
+          href="#"
+          className="text-blue-600 underline"
+          onClick={() => handleSectionChange("api-polling")}
+        >
+          Asynchronous Processing
+        </a>{" "}
+        section.
+      </Paragraph>
 
       <SectionHeader>Implementation Example</SectionHeader>
       <Paragraph>
@@ -131,7 +203,9 @@ export const ApiSift = () => {
         JavaScript and the Fetch API:
       </Paragraph>
       <CodeBlock>
-        {`async function runSiftAnalysis(classValues, targetArchiveFile, baseArchiveFile, labelFile) {
+        {`import { api } from "./services/api"; // Import API URL from your config
+
+async function runSiftAnalysis(classValues, targetArchiveFile, baseArchiveFile, labelFile) {
   const formData = new FormData();
   
   // Append the class values as a JSON string
@@ -145,7 +219,7 @@ export const ApiSift = () => {
   formData.append('label', labelFile, labelFile.name);
 
   try {
-    const response = await fetch('http://127.0.0.1:5000/run-sift', {
+    const response = await fetch(\`\${api}/run-sift\`, {
       method: 'POST',
       body: formData,
       // No need to set Content-Type header, fetch sets it automatically with boundary
@@ -155,7 +229,13 @@ export const ApiSift = () => {
       throw new Error(\`HTTP error! status: \${response.status}\`);
     }
     
+    // Get initial response with tracking information
     const data = await response.json();
+    console.log('Processing started with ID:', data.uid);
+    console.log('Progress URL:', data.progress_url);
+    console.log('Results URL:', data.status_url);
+    
+    // See the Asynchronous Processing section for implementing the polling mechanism
     return data;
   } catch (error) {
     console.error('Error running SIFT analysis:', error);
@@ -167,9 +247,17 @@ export const ApiSift = () => {
       <div className="mt-8 rounded-lg bg-yellow-50 p-4 text-yellow-800">
         <p className="font-medium">Important Note</p>
         <p className="mt-2">
-          Processing large archives can take significant time. Design your
-          application to handle asynchronous processing and provide appropriate
-          feedback to users during this time.
+          Processing large archives can take significant time. The API now uses
+          an asynchronous processing model that allows you to track progress in
+          real-time. See the{" "}
+          <a
+            href="#"
+            className="text-blue-600 underline"
+            onClick={() => handleSectionChange("api-polling")}
+          >
+            Asynchronous Processing
+          </a>{" "}
+          section for details on implementing the polling mechanism.
         </p>
       </div>
     </ContentLayout>

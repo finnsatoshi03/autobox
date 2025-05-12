@@ -4,8 +4,12 @@ import {
   Paragraph,
   SectionHeader,
 } from "./ContentLayout";
+import { useContext } from "react";
+import { DocumentationContext } from "../DocumentationContext";
 
 export const ApiRequest = () => {
+  const { handleSectionChange } = useContext(DocumentationContext);
+
   return (
     <ContentLayout
       title="API Request Format"
@@ -127,6 +131,7 @@ export const ApiRequest = () => {
       <SectionHeader>Request Example in JavaScript (Axios)</SectionHeader>
       <CodeBlock>
         {`import axios from 'axios';
+import { api } from './services/api'; // Import from your config
 
 const sendSiftRequest = async () => {
   // Sample class values
@@ -149,11 +154,20 @@ const sendSiftRequest = async () => {
   
   // Send the request
   try {
-    const response = await axios.post("http://127.0.0.1:5000/run-sift", formData, {
+    const response = await axios.post(\`\${api}/run-sift\`, formData, {
       headers: { "Content-Type": "multipart/form-data" }
     });
     
-    console.log("Analysis results:", response.data);
+    // Get tracking information from the initial response
+    const { progress_url, status_url, uid } = response.data;
+    
+    console.log("Processing started with ID:", uid);
+    console.log("You can track progress at:", progress_url);
+    console.log("Final results will be available at:", status_url);
+    
+    // See the Asynchronous Processing section for details on how to
+    // implement polling with these URLs
+    
     return response.data;
   } catch (error) {
     console.error("Error during SIFT analysis:", error);
@@ -169,6 +183,18 @@ const sendSiftRequest = async () => {
           appropriate error messages if the request format is invalid. Always
           check the response status and error messages to troubleshoot
           integration issues.
+        </p>
+        <p className="mt-2">
+          Note that the response format has changed to support asynchronous
+          processing. See the{" "}
+          <a
+            href="#"
+            className="text-blue-600 underline"
+            onClick={() => handleSectionChange("api-polling")}
+          >
+            Asynchronous Processing
+          </a>{" "}
+          section for details on how to handle the response.
         </p>
       </div>
     </ContentLayout>

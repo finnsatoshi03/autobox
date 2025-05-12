@@ -134,6 +134,12 @@ export const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
             icon={<ChevronRight size={16} />}
             onClick={() => onSectionChange("api-response")}
           />
+          <SidebarItem
+            title="Asynchronous Processing"
+            active={activeSection === "api-polling"}
+            icon={<ChevronRight size={16} />}
+            onClick={() => onSectionChange("api-polling")}
+          />
         </SidebarItem>
 
         <SidebarItem
