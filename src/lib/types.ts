@@ -49,6 +49,24 @@ export interface SiftResponse {
   processing_time: string;
   total_annotated_images: string;
   total_images: number;
+  status?: string;
+}
+
+export interface SiftInitialResponse {
+  message: string;
+  progress_url: string;
+  status_url: string;
+  uid: string;
+}
+
+export interface SiftProgressResponse {
+  details: Array<{
+    confidence: number;
+    image: string;
+    status: string;
+  }>;
+  processed: number;
+  total: number;
 }
 
 export interface SiftRequest {
