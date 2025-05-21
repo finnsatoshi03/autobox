@@ -1,7 +1,7 @@
-import { ChangeEvent, DragEvent } from "react";
+import { ChangeEvent, DragEvent, useRef, useEffect } from "react";
 import { BaseImageRequirementsDialog } from "./requirements-dialog";
 import { Button } from "../ui/button";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, Folder } from "lucide-react";
 
 interface UploadViewProps {
   currentStep: string;
@@ -30,6 +30,18 @@ export const UploadView = ({
   onDontShowChange,
   onBack,
 }: UploadViewProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+
+  // Set directory attributes after component mounts
+  useEffect(() => {
+    if (folderInputRef.current) {
+      // Set the webkitdirectory attribute
+      folderInputRef.current.setAttribute("webkitdirectory", "");
+      folderInputRef.current.setAttribute("directory", "");
+    }
+  }, []);
+
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) {
       await onFileUpload(Array.from(e.target.files));
@@ -89,24 +101,46 @@ export const UploadView = ({
         </h1>
         <p className="max-w-md text-sm text-gray-600">
           {currentStep === "upload"
-            ? "Upload base images for reference. You'll add labels in the next step."
+            ? "Upload base images for reference. You can select individual files or a folder. You'll add labels in the next step."
             : "Upload target images in a supported archive format for processing. Each archive should contain the images you want to analyze."}
         </p>
         <div className="flex flex-col items-center space-y-4">
-          <Button
-            size="lg"
-            className="flex items-center space-x-2 bg-lime-green text-black hover:bg-lime-green/80"
-            onClick={() => document.getElementById("file-upload")?.click()}
-          >
-            <Upload className="h-4 w-4" />
-            <span>
-              Choose {currentStep === "targetUpload" ? "Archive" : "Images"}
-            </span>
-          </Button>
+          {currentStep === "upload" ? (
+            <div className="flex flex-row space-x-2">
+              <Button
+                size="lg"
+                className="flex items-center space-x-2 bg-lime-green text-black hover:bg-lime-green/80"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-4 w-4" />
+                <span>Choose Images</span>
+              </Button>
+              <Button
+                size="lg"
+                className="flex items-center space-x-2 bg-lime-green text-black hover:bg-lime-green/80"
+                onClick={() => folderInputRef.current?.click()}
+              >
+                <Folder className="h-4 w-4" />
+                <span>Choose Folder</span>
+              </Button>
+            </div>
+          ) : (
+            <Button
+              size="lg"
+              className="flex items-center space-x-2 bg-lime-green text-black hover:bg-lime-green/80"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="h-4 w-4" />
+              <span>Choose Archive</span>
+            </Button>
+          )}
+
           <p className="text-sm text-gray-500">
             or drop {getArchiveText()} here
           </p>
+
           <input
+            ref={fileInputRef}
             id="file-upload"
             type="file"
             accept={
@@ -116,6 +150,15 @@ export const UploadView = ({
             className="hidden"
             onChange={handleFileChange}
           />
+
+          {currentStep === "upload" && (
+            <input
+              ref={folderInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          )}
         </div>
       </div>
     </div>

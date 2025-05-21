@@ -39,7 +39,7 @@ const progressStyles = `
     right: 100%;
   }
   60% {
-    left: 100%;
+    left: 100%; 
     right: -90%;
   }
   100% {
@@ -250,9 +250,24 @@ export default function Playground() {
     );
   };
 
+  // Helper to check if file is an image
+  const isImageFile = (file: File): boolean => {
+    return file.type.startsWith("image/");
+  };
+
   const handleFileUpload = async (files: File[]) => {
     if (state.currentStep === "upload") {
-      await addBaseImages(files);
+      // Filter to only include image files
+      const imageFiles = files.filter(isImageFile);
+
+      if (files.length > 0 && imageFiles.length === 0) {
+        toast.error(
+          "No valid image files found. Please select images or a folder containing images.",
+        );
+        return;
+      }
+
+      await addBaseImages(imageFiles);
       const lastImageId = state.baseImages[state.baseImages.length - 1]?.id;
       if (lastImageId) setSelectedImageId(lastImageId);
     } else if (state.currentStep === "targetUpload") {

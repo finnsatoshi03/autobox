@@ -1,8 +1,7 @@
-import { ChangeEvent, useState, useEffect } from "react";
+import { ChangeEvent, useState, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
-import { ArrowLeft, X, Tag, PlusCircle, Layers } from "lucide-react";
+import { ArrowLeft, X, Tag, PlusCircle, Upload, Folder } from "lucide-react";
 import { Input } from "../ui/input";
-import { AddMoreButton } from "./add-more";
 import { ImageThumbnail } from "./image-thumbnail";
 import { BaseImage } from "@/lib/types";
 import {
@@ -48,6 +47,19 @@ export const BaseImagesView = ({
     startIndex: number;
     count: number;
   } | null>(null);
+
+  // Refs for file inputs
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const appendFileInputRef = useRef<HTMLInputElement>(null);
+  const appendFolderInputRef = useRef<HTMLInputElement>(null);
+
+  // Set directory attributes after component mounts
+  useEffect(() => {
+    if (appendFolderInputRef.current) {
+      appendFolderInputRef.current.setAttribute("webkitdirectory", "");
+      appendFolderInputRef.current.setAttribute("directory", "");
+    }
+  }, []);
 
   // Helper to check if a label prefix already exists in the images
   const getLabelPrefixes = () => {
@@ -237,10 +249,16 @@ export const BaseImagesView = ({
           </div>
 
           <div className="flex w-full gap-4 overflow-x-auto pb-4">
-            <AddMoreButton
-              onClick={() => document.getElementById("file-upload")?.click()}
-              disabled={false}
-            />
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-24 w-24 border-dashed border-gray-400"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-10 w-10 text-gray-400" />
+              </Button>
+            </div>
             {images.map((image) => (
               <ImageThumbnail
                 key={image.id}
@@ -264,6 +282,7 @@ export const BaseImagesView = ({
       </div>
 
       <input
+        ref={fileInputRef}
         id="file-upload"
         type="file"
         accept="image/*"
@@ -273,10 +292,19 @@ export const BaseImagesView = ({
       />
 
       <input
+        ref={appendFileInputRef}
         id="append-file-upload"
         type="file"
         accept="image/*"
         multiple
+        className="hidden"
+        onChange={handleAppendFileChange}
+      />
+
+      <input
+        ref={appendFolderInputRef}
+        id="append-folder-upload"
+        type="file"
         className="hidden"
         onChange={handleAppendFileChange}
       />
@@ -327,18 +355,27 @@ export const BaseImagesView = ({
 
             <div className="flex justify-center rounded-md border border-dashed border-gray-300 px-6 py-10">
               <div className="text-center">
-                <Layers className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="mt-4 flex text-sm">
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      document.getElementById("append-file-upload")?.click()
-                    }
-                  >
-                    Select images to append
-                  </Button>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="flex gap-4">
+                    <Button
+                      variant="outline"
+                      className="flex items-center"
+                      onClick={() => appendFileInputRef.current?.click()}
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Select Files
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex items-center"
+                      onClick={() => appendFolderInputRef.current?.click()}
+                    >
+                      <Folder className="mr-2 h-4 w-4" />
+                      Select Folder
+                    </Button>
+                  </div>
                 </div>
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-4 text-xs text-gray-500">
                   Images will be added to your current batch
                 </p>
               </div>
